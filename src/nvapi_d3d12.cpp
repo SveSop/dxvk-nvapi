@@ -213,10 +213,12 @@ extern "C" {
             case NV_GPU_ARCHITECTURE_GA100:
                 pGraphicsCaps->majorSMVersion = 8;
                 pGraphicsCaps->minorSMVersion = 6; // Take the risk that no one uses an NVIDIA A100 with this implementation
+                pGraphicsCaps->bVariablePixelRateShadingSupported = true; // Should be supported on Turing and newer
                 break;
             case NV_GPU_ARCHITECTURE_TU100:
                 pGraphicsCaps->majorSMVersion = 7;
                 pGraphicsCaps->minorSMVersion = 5;
+                pGraphicsCaps->bVariablePixelRateShadingSupported = true; // Should be supported on Turing and newer
                 break;
             case NV_GPU_ARCHITECTURE_GV100:
                 pGraphicsCaps->majorSMVersion = 7;
@@ -237,7 +239,6 @@ extern "C" {
         // These fields should be derivable from architecture, but not sure yet what the consequences are
         // Currently we do not require these fields, we can implement them later.
         // pGraphicsCaps->bExclusiveScissorRectsSupported = ;
-        // pGraphicsCaps->bVariablePixelRateShadingSupported = ; // Should be supported on Turing and newer
 
         return Ok(str::format(n, " (sm_", pGraphicsCaps->majorSMVersion, pGraphicsCaps->minorSMVersion, ")"));
     }
