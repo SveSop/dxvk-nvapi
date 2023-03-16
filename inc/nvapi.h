@@ -1278,6 +1278,13 @@ NVAPI_INTERFACE NvAPI_Unload();
 NVAPI_INTERFACE NvAPI_Unknown(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pSupport);
 
 ///////////////////////////////////////////////////////////////////////////////
+// FUNCTION NAME:   NvAPI_Unknown2
+//
+//! DESCRIPTION:     This API is unknown and experimental
+///////////////////////////////////////////////////////////////////////////////
+NVAPI_INTERFACE NvAPI_Unknown2(NvPhysicalGpuHandle hPhysicalGpu, NvU32 pInfo, NvU32 *pSupport);
+
+///////////////////////////////////////////////////////////////////////////////
 //
 // FUNCTION NAME: NvAPI_GetErrorMessage
 //

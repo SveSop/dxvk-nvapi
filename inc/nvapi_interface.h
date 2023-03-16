@@ -481,6 +481,7 @@ struct NVAPI_INTERFACE_TABLE nvapi_interface_table[] =
     { "NvAPI_SYS_GetDisplayDriverInfo", 0x721faceb },
     { "NvAPI_GPU_ClientRegisterForUtilizationSampleUpdates", 0xadeeaf67 },
     { "NvAPI_Unknown", 0x7dbe90ab },
+    { "NvAPI_Unknown2", 0xed74af30 },
 };
 
 #endif // _NVAPI_INTERFACE_H
