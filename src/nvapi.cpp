@@ -217,6 +217,26 @@ extern "C" {
         return Ok(n);
     }
 
+    NvAPI_Status __cdecl NvAPI_Unknown(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pSupport) {
+        // Completely unknown. Experimental!
+        constexpr auto n = __func__;
+
+        if (nvapiAdapterRegistry == nullptr)
+            return ApiNotInitialized(n);
+
+        if (pSupport == nullptr)
+            return InvalidArgument(n);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        // Guesswork - Assuming this is some sort of feature check
+        *pSupport = 63;
+
+        return Ok(str::format(n, " Unknown support: ", *pSupport));
+    }
+
     NvAPI_Status __cdecl NvAPI_GetErrorMessage(NvAPI_Status nr, NvAPI_ShortString szDesc) {
         constexpr auto n = __func__;
 

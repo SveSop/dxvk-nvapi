@@ -122,6 +122,7 @@ extern "C" {
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GetAssociatedNvidiaDisplayName)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GetInterfaceVersionString)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GetErrorMessage)
+        INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_Unknown)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_Unload)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_Initialize)
         /* End */
