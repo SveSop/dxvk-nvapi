@@ -627,7 +627,7 @@ extern "C" {
         if (pComputeTopo == nullptr)
             return InvalidArgument(n);
 
-        if (pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER1)
+        if (pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER1 && pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER)
             return IncompatibleStructVersion(n);
 
         auto cudaCapableGpus = std::vector<NvPhysicalGpuHandle>(0);
@@ -652,6 +652,14 @@ extern "C" {
                 }
                 break;
             }
+            case NV_COMPUTE_GPU_TOPOLOGY_VER:
+                pComputeTopo->gpuCount = cudaCapableGpus.size();
+                pComputeTopo->computeGpus = (NV_COMPUTE_GPU*)malloc(pComputeTopo->gpuCount * sizeof(NV_COMPUTE_GPU));
+                for (auto i = 0U; i < cudaCapableGpus.size(); i++) {
+                    pComputeTopo->computeGpus[i].hPhysicalGpu = cudaCapableGpus[i];
+                    pComputeTopo->computeGpus[i].flags = flags;
+                }
+                break;
             default:
                 return Error(n); // Unreachable, but just to be sure
         }
