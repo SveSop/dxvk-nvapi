@@ -211,6 +211,16 @@ namespace dxvk {
         return (m_dxgiDesc.DedicatedVideoMemory + m_dxgiDesc.DedicatedSystemMemory) / 1024;
     }
 
+    uint32_t NvapiAdapter::GetDedSysRamSize() const {
+        // Report dedicated system meory size from DXVK
+        return m_dxgiDesc.DedicatedSystemMemory / 1024;
+    }
+
+    uint32_t NvapiAdapter::GetShaSysRamSize() const {
+        // Report shared system meory size from DXVK
+        return m_dxgiDesc.SharedSystemMemory / 1024;
+    }
+
     std::optional<LUID> NvapiAdapter::GetLuid() const {
         if (!m_vkIdProperties.deviceLUIDValid)
             return {};
