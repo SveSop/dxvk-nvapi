@@ -254,6 +254,20 @@ extern "C" {
         return Ok(str::format(n, " (sm_", pGraphicsCaps->majorSMVersion, pGraphicsCaps->minorSMVersion, ")"));
     }
 
+    NvAPI_Status __cdecl NvAPI_D3D12_SetNvShaderExtnSlotSpace(IUnknown *pDevice, NvU32 uavSlot, NvU32 uavSpace) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedError = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::ptr(pDevice), uavSlot, uavSpace);
+
+        if(pDevice == nullptr || uavSlot == 0)
+            return InvalidArgument(n);
+
+        // This will not work without actually using this uavslot/uavspace in vkd3d. Returning Error
+        return Error(str::format(n, " uavSlot: ", uavSlot, " uavSpace: ", uavSpace, alreadyLoggedError));
+    }
+
     NvAPI_Status __cdecl NvAPI_D3D12_IsFatbinPTXSupported(ID3D12Device* pDevice, bool* isSupported) {
         constexpr auto n = __func__;
         thread_local bool alreadyLoggedError = false;
