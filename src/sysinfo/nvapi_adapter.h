@@ -34,6 +34,7 @@ namespace dxvk {
         [[nodiscard]] bool HasNvmlDevice() const;
         [[nodiscard]] std::string GetNvmlErrorString(nvmlReturn_t result) const;
         [[nodiscard]] nvmlReturn_t GetNvmlDeviceClockInfo(nvmlClockType_t type, unsigned int* clock) const;
+        [[nodiscard]] nvmlReturn_t GetNvmlDeviceMaxClockInfo(nvmlClockType_t type, unsigned int* clock) const;
         [[nodiscard]] nvmlReturn_t GetNvmlDeviceTemperature(nvmlTemperatureSensors_t sensorType, unsigned int* temp) const;
         [[nodiscard]] nvmlReturn_t GetNvmlDeviceThermalSettings(unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings) const;
         [[nodiscard]] nvmlReturn_t GetNvmlDevicePerformanceState(nvmlPstates_t* pState) const;
