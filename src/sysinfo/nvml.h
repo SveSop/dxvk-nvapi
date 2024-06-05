@@ -14,6 +14,7 @@ namespace dxvk {
         [[nodiscard]] virtual nvmlReturn_t DeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t* device) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock) const;
+        [[nodiscard]] virtual nvmlReturn_t DeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensors_t sensorType, unsigned int* temp) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetThermalSettings(nvmlDevice_t device, unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetPerformanceState(nvmlDevice_t device, nvmlPstates_t* pState) const;
@@ -41,6 +42,7 @@ namespace dxvk {
         DECLARE_PFN(nvmlDeviceGetHandleByPciBusId_v2);
         DECLARE_PFN(nvmlDeviceGetPciInfo_v3);
         DECLARE_PFN(nvmlDeviceGetClockInfo);
+        DECLARE_PFN(nvmlDeviceGetMaxClockInfo);
         DECLARE_PFN(nvmlDeviceGetTemperature);
         DECLARE_PFN(nvmlDeviceGetThermalSettings);
         DECLARE_PFN(nvmlDeviceGetPerformanceState);
