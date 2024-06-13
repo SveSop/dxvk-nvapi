@@ -26,8 +26,12 @@ nvapi_src = files([
   'nvapi_interface.cpp',
 ])
 
+arch_dir_prefix = target_machine.cpu_family() == 'x86_64' ? 'x86_64-' : 'i386-'
+install_dir_windows = install_dir / arch_dir_prefix + 'windows'
+
 nvapi_dll = shared_library('nvapi'+target_suffix, [ nvapi_src, dxvk_nvapi_version ],
   name_prefix         : '',
   dependencies        : [ lib_dxgi, lib_d3d11, lib_version ],
   include_directories : [ vk_headers ],
-  install             : true)
+  install             : true,
+  install_dir         : install_dir_windows)
