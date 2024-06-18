@@ -117,41 +117,10 @@ namespace dxvk::env {
         }
     }
 
-    bool isGhostOfTsushima() {
-        return getExecutableName() == std::string("GhostOfTsushima.exe");
-    }
-
     bool needsAmpereSpoofing(NV_GPU_ARCHITECTURE_ID architectureId, void* pReturnAddress) {
         // Check if we need to workaround NVIDIA Bug 3634851
         if (architectureId >= NV_GPU_ARCHITECTURE_AD100 && isDLSSVersion20To24(pReturnAddress)) {
             log::info("Spoofing Ampere for Ada and later due to DLSS version 2.0-2.4");
-            return true;
-        }
-
-        if (architectureId >= NV_GPU_ARCHITECTURE_AD100 && isGhostOfTsushima()) {
-            log::info("Spoofing Ampere for Ada and later due to detecting GhostOfTsushima.exe");
-            return true;
-        }
-
-        return false;
-    }
-
-    bool isMonsterHunterWorld() {
-        return getExecutableName() == std::string("MonsterHunterWorld.exe");
-    }
-
-    bool isWarThunder() {
-        return getExecutableName() == std::string("aces.exe");
-    }
-
-    bool needsPascalSpoofing(NV_GPU_ARCHITECTURE_ID architectureId) {
-        if (architectureId >= NV_GPU_ARCHITECTURE_TU100 && isMonsterHunterWorld()) {
-            log::info("Spoofing Pascal for Turing and later due to detecting MonsterHunterWorld.exe");
-            return true;
-        }
-
-        if (architectureId >= NV_GPU_ARCHITECTURE_TU100 && isWarThunder()) {
-            log::info("Spoofing Pascal for Turing and later due to detecting aces.exe (War Thunder)");
             return true;
         }
 
@@ -218,9 +187,6 @@ namespace dxvk::env {
 
         if (env::needsAmpereSpoofing(architectureId, returnAddress))
             architectureId = NV_GPU_ARCHITECTURE_GA100;
-
-        if (env::needsPascalSpoofing(architectureId))
-            architectureId = NV_GPU_ARCHITECTURE_GP100;
 
         return architectureId;
     }
