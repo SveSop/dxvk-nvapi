@@ -133,6 +133,7 @@ struct NVAPI_INTERFACE_TABLE nvapi_interface_table[] =
     { "NvAPI_GPU_ClientIllumZonesGetControl", 0x3dbf5764 },
     { "NvAPI_GPU_ClientIllumZonesSetControl", 0x197d065e },
     { "NvAPI_GPU_GetGPCMask", 0x7dbe90ab },
+    { "NvAPI_GPU_GetTPCMaskOnGPC", 0xed74af30 },
     { "NvAPI_Event_RegisterCallback", 0xe6dbea69 },
     { "NvAPI_Event_UnregisterCallback", 0xde1f9b45 },
     { "NvAPI_EnumNvidiaDisplayHandle", 0x9abdd40d },
