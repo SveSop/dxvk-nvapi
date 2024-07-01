@@ -54,6 +54,7 @@ extern "C" {
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_MultiGPU_Init)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_MultiGPU_GetCaps)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_IsNvShaderExtnOpCodeSupported)
+        INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_SetNvShaderExtnSlotSpaceLocalThread)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_EnumerateMetaCommands)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_CreateGraphicsPipelineState)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_SetDepthBoundsTestValues)
