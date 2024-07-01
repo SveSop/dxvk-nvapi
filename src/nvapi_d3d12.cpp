@@ -39,6 +39,20 @@ extern "C" {
         return Ok(str::format(n, " (", opCode, "/", fromCode(opCode), ")", " ", std::boolalpha, *pSupported));
     }
 
+    NvAPI_Status __cdecl NvAPI_D3D12_SetNvShaderExtnSlotSpaceLocalThread(IUnknown* pDev, NvU32 uavSlot, NvU32 uavSpace) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedError = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::ptr(pDev), uavSlot, uavSpace);
+
+        if (!pDev)
+            return InvalidArgument(n);
+
+        // Probably not a useful idea to return OK on this
+        return Error(str::format(n, " ", uavSlot, " ", uavSpace), alreadyLoggedError);
+    }
+
     NvAPI_Status __cdecl NvAPI_D3D12_EnumerateMetaCommands(ID3D12Device* pDevice, NvU32* pNumMetaCommands, NVAPI_META_COMMAND_DESC* pDescs) {
         constexpr auto n = __func__;
 
