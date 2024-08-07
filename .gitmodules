@@ -3,4 +3,4 @@
 	url = https://github.com/KhronosGroup/Vulkan-Headers
 [submodule "external/nvapi"]
 	path = external/nvapi
-	url = https://github.com/NVIDIA/nvapi
+	url = https://github.com/SveSop/nvapi_nvlibs
