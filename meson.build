@@ -56,6 +56,8 @@ dxvk_nvapi_version = vcs_tag(
   input:  'version.h.in',
   output: 'version.h')
 
+install_dir = get_option('libdir') / 'wine'
+
 subdir('src')
 
 enable_tests = get_option('enable_tests')
