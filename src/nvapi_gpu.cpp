@@ -1297,4 +1297,27 @@ extern "C" {
 
         return Ok(str::format(n, " GPCMask support: ", *pSupport));
     }
+
+    NvAPI_Status __cdecl NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32 pInfo, NvU32 *pSupport) {
+        // Completely unknown. Experimental!
+        constexpr auto n = __func__;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGpu), pInfo, log::fmt::ptr(pSupport));
+
+        if (nvapiAdapterRegistry == nullptr)
+            return ApiNotInitialized(n);
+
+        if (pSupport == nullptr)
+            return InvalidArgument(n);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        // Guesswork - Assuming this is some sort of feature check
+        *pSupport = 63;
+
+        return Ok(str::format(n, " TPCMaskOnGPC info: ", pInfo, " support: ", *pSupport));
+    }
 }
