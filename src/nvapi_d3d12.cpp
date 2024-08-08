@@ -7,6 +7,7 @@
 #include "util/util_pso_extension.h"
 #include "util/util_string.h"
 #include "nvShaderExtnEnums.h"
+#include "mock_d3d12NvMetaCommand.h"
 
 extern "C" {
     using namespace dxvk;
@@ -90,6 +91,22 @@ extern "C" {
         }
 
         return Ok(str::format(n, " ", *pNumMetaCommands, " (", (pDescs), ")"));
+    }
+
+    NvAPI_Status __cdecl NvAPI_D3D12_CreateMetaCommand(ID3D12Device* pDevice, REFGUID CommandId, NvU32 NodeMask, const void* pCreationParametersData, NvU32 CreationParametersDataSize, ID3D12NvMetaCommand** ppMetaCommand) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedOk = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::ptr(pDevice), log::fmt::ptr(pCreationParametersData), CreationParametersDataSize, log::fmt::ptr(*ppMetaCommand));
+
+        if (!pDevice || !ppMetaCommand || !pCreationParametersData)
+            return InvalidArgument(n);
+        try {
+            *ppMetaCommand = new MockD3D12NvMetaCommand();
+            return Ok(str::format(n, " (", *ppMetaCommand, ")"), alreadyLoggedOk); }
+        catch (...) {
+            return NotSupported(n); }
     }
 
     NvAPI_Status __cdecl NvAPI_D3D12_CreateCubinComputeShaderEx(ID3D12Device* pDevice, const void* cubinData, NvU32 cubinSize, NvU32 blockX, NvU32 blockY, NvU32 blockZ, NvU32 smemSize, const char* shaderName, NVDX_ObjectHandle* pShader) {
