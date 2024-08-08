@@ -58,9 +58,38 @@ extern "C" {
         if (pDevice == nullptr || pNumMetaCommands == nullptr)
             return InvalidArgument(n);
 
-        *pNumMetaCommands = 0; // No meta commands with this implementation
+        // If called with pDescs == NULL or *pNumMetaCommands == 0, it means to retreive number of supported MetaCommands ref. NVAPI header
+        if (pDescs == nullptr || *pNumMetaCommands == 0) {
+            *pNumMetaCommands = 3;
+            return Ok(str::format(n, " ", *pNumMetaCommands));
+        }
 
-        return Ok(n);
+        if (*pNumMetaCommands > 3) *pNumMetaCommands = 3; // Only 3 metacommands supported. TODO: check arch maybe?
+
+        switch (*pNumMetaCommands) {
+            case 3:
+                pDescs[2].Id = { 0x8F9FF059, 0xFE72, 0x488E, {0xA0, 0x66, 0xB1, 0x4E, 0x79, 0x48, 0xEC, 0x08 }};
+                pDescs[2].Name = L"GEMM (General matrix multiply)";
+                pDescs[2].InitializationDirtyState = NV_D3D_GRAPHICS_STATE_NONE;
+                pDescs[2].ExecutionDirtyState = NV_D3D_GRAPHICS_STATE_NONE;
+                [[fallthrough]];
+            case 2:
+                pDescs[1].Id = { 0xE1B112EB, 0xDECD, 0x4FF6, {0x85, 0xBB, 0x1F, 0x0E, 0x3A, 0xB0, 0x04, 0x14 }};
+                pDescs[1].Name = L"Convolution Fused with pooling/upsampling";
+                pDescs[1].InitializationDirtyState = NV_D3D_GRAPHICS_STATE_NONE;
+                pDescs[1].ExecutionDirtyState = NV_D3D_GRAPHICS_STATE_NONE;
+                [[fallthrough]];
+            case 1:
+                pDescs[0].Id = { 0xA7666F1E, 0x9C55, 0x47EE, {0x9E, 0xB3, 0xE1, 0x62, 0x00, 0x92, 0xD1, 0xE9 }};
+                pDescs[0].Name = L"Convolution Extended";
+                pDescs[0].InitializationDirtyState = NV_D3D_GRAPHICS_STATE_NONE;
+                pDescs[0].ExecutionDirtyState = NV_D3D_GRAPHICS_STATE_NONE;
+                break;
+            default:
+                break;
+        }
+
+        return Ok(str::format(n, " ", *pNumMetaCommands, " (", (pDescs), ")"));
     }
 
     NvAPI_Status __cdecl NvAPI_D3D12_CreateCubinComputeShaderEx(ID3D12Device* pDevice, const void* cubinData, NvU32 cubinSize, NvU32 blockX, NvU32 blockY, NvU32 blockZ, NvU32 smemSize, const char* shaderName, NVDX_ObjectHandle* pShader) {
