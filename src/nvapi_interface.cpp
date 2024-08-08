@@ -58,6 +58,7 @@ extern "C" {
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_EnumerateMetaCommands)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_CreateMetaCommand)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_InitializeMetaCommand)
+        INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_ExecuteMetaCommand)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_CreateGraphicsPipelineState)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_SetDepthBoundsTestValues)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_CreateCubinComputeShaderWithName)

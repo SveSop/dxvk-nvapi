@@ -122,6 +122,19 @@ extern "C" {
         return Ok(n, alreadyLoggedOk);
     }
 
+    NvAPI_Status __cdecl NvAPI_D3D12_ExecuteMetaCommand(ID3D12GraphicsCommandList* pCommandlist, ID3D12NvMetaCommand* pMetaCommand, const void* pExecutionParametersData, NvU32 ExecutionParametersDataSize) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedOk = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::ptr(pCommandlist), log::fmt::ptr(pMetaCommand), log::fmt::ptr(pExecutionParametersData), ExecutionParametersDataSize);
+
+        if (!pCommandlist || !pMetaCommand || !pExecutionParametersData)
+            return InvalidArgument(n);
+
+        return Ok(n, alreadyLoggedOk);
+    }
+
     NvAPI_Status __cdecl NvAPI_D3D12_CreateCubinComputeShaderEx(ID3D12Device* pDevice, const void* cubinData, NvU32 cubinSize, NvU32 blockX, NvU32 blockY, NvU32 blockZ, NvU32 smemSize, const char* shaderName, NVDX_ObjectHandle* pShader) {
         constexpr auto n = __func__;
         thread_local bool alreadyLoggedError = false;
