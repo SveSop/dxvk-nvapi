@@ -638,7 +638,7 @@ extern "C" {
         if (pComputeTopo == nullptr)
             return InvalidArgument(n);
 
-        if (pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER1)
+        if (pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER1 && pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER)
             return IncompatibleStructVersion(n, pComputeTopo->version);
 
         auto cudaCapableGpus = std::vector<NvPhysicalGpuHandle>(0);
@@ -660,6 +660,16 @@ extern "C" {
                 for (auto i = 0U; i < cudaCapableGpus.size(); i++) {
                     pComputeTopoV1->computeGpus[i].hPhysicalGpu = cudaCapableGpus[i];
                     pComputeTopoV1->computeGpus[i].flags = flags;
+                }
+                break;
+            }
+            case NV_COMPUTE_GPU_TOPOLOGY_VER: {
+                auto pComputeTopoV2 = reinterpret_cast<NV_COMPUTE_GPU_TOPOLOGY_V2*>(pComputeTopo);
+                pComputeTopoV2->gpuCount = cudaCapableGpus.size();
+                pComputeTopoV2->computeGpus = new NV_COMPUTE_GPU[pComputeTopoV2->gpuCount];
+                for (auto i = 0U; i < cudaCapableGpus.size(); i++) {
+                    pComputeTopoV2->computeGpus[i].hPhysicalGpu = cudaCapableGpus[i];
+                    pComputeTopoV2->computeGpus[i].flags = flags;
                 }
                 break;
             }
