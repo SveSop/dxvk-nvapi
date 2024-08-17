@@ -1192,6 +1192,9 @@ extern "C" {
 
     NvAPI_Status __cdecl NvAPI_GPU_GetPstates20(NvPhysicalGpuHandle hPhysicalGpu, NV_GPU_PERF_PSTATES20_INFO* pPstatesInfo) {
         constexpr auto n = __func__;
+        thread_local bool alreadyLoggedNoNvml = false;
+        thread_local bool alreadyLoggedHandleInvalidated = false;
+        thread_local bool alreadyLoggedOk = false;
 
         if (log::tracing())
             log::trace(n, log::fmt::hnd(hPhysicalGpu), log::fmt::ptr(pPstatesInfo));
@@ -1202,15 +1205,80 @@ extern "C" {
         if (pPstatesInfo == nullptr)
             return InvalidArgument(n);
 
+        if(pPstatesInfo->version != NV_GPU_PERF_PSTATES20_INFO_VER1 && pPstatesInfo->version != NV_GPU_PERF_PSTATES20_INFO_VER2 && pPstatesInfo->version != NV_GPU_PERF_PSTATES20_INFO_VER)
+            return IncompatibleStructVersion(n, pPstatesInfo->version);
+
         auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
         if (!nvapiAdapterRegistry->IsAdapter(adapter))
             return ExpectedPhysicalGpuHandle(n);
 
-        if (env::needsSucceededGpuQuery()) {
+        if (env::needsSucceededGpuQuery() && !adapter->HasNvml()) {
             pPstatesInfo->numPstates = 0;
             return Ok(n);
         }
 
-        return NoImplementation(n);
+        if (!adapter->HasNvml())
+            return NoImplementation(n, alreadyLoggedNoNvml);
+
+        if (!adapter->HasNvmlDevice())
+            return HandleInvalidated(str::format(n, ": NVML available but current adapter is not NVML compatible"), alreadyLoggedHandleInvalidated);
+
+        nvmlPstates_t pState;
+        auto result = adapter->GetNvmlDevicePerformanceState(&pState);
+        switch (result) {
+            case NVML_SUCCESS:
+                // Some general struct-data - currently only reads active pState
+                pPstatesInfo->numPstates = 1;
+                pPstatesInfo->numClocks = 2;
+                pPstatesInfo->numBaseVoltages = 1;
+                pPstatesInfo->pstates[0].reserved = 0;
+                pPstatesInfo->ov.numVoltages = 1;
+                pPstatesInfo->pstates[0].pstateId = static_cast<NV_GPU_PERF_PSTATE_ID>(pState);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                return NotSupported(n);
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", adapter->GetNvmlErrorString(result)));
+        }
+
+        unsigned int clock;
+        // Do nvml call on a "per clock unit" to get the clock
+        auto resultGpu = adapter->GetNvmlDeviceMaxClockInfo(NVML_CLOCK_GRAPHICS, &clock);
+        switch (resultGpu) {
+            case NVML_SUCCESS:
+                // Some general struct-data.
+                pPstatesInfo->pstates[0].clocks[0].typeId = NVAPI_GPU_PERF_PSTATE20_CLOCK_TYPE_RANGE;
+                pPstatesInfo->pstates[0].clocks[0].domainId = NVAPI_GPU_PUBLIC_CLOCK_GRAPHICS;
+                pPstatesInfo->pstates[0].clocks[0].freqDelta_kHz.value = 0;
+                pPstatesInfo->pstates[0].clocks[0].data.range.maxFreq_kHz = (clock * 1000);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                return NotSupported(n);
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", adapter->GetNvmlErrorString(result)));
+        }
+
+        auto resultMem = adapter->GetNvmlDeviceClockInfo(NVML_CLOCK_MEM, &clock);
+        switch (resultMem) {
+            case NVML_SUCCESS:
+                // Some general struct-data.
+                pPstatesInfo->pstates[0].clocks[1].typeId = NVAPI_GPU_PERF_PSTATE20_CLOCK_TYPE_SINGLE;
+                pPstatesInfo->pstates[0].clocks[1].domainId = NVAPI_GPU_PUBLIC_CLOCK_MEMORY;
+                pPstatesInfo->pstates[0].clocks[1].freqDelta_kHz.value = 0;
+                pPstatesInfo->pstates[0].clocks[1].data.single.freq_kHz = (clock * 1000);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                return NotSupported(n);
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", adapter->GetNvmlErrorString(result)));
+        }
+
+        return Ok(n, alreadyLoggedOk);
     }
 }
