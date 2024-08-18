@@ -137,6 +137,10 @@ namespace dxvk::env {
             || getExecutableName() == std::string("XDefiant_BE.exe");
     }
 
+    bool isElevatorDemo() {
+        return getExecutableName() == std::string("ElevatorDemo-Win64-Shipping.exe");
+    }
+
     bool needsSucceededGpuQuery() {
         if (isTheLastOfUsPartOne()) {
             log::info("Faking GPU query success due to detecting tlou-i.exe/tlou-i-l.exe");
@@ -148,6 +152,14 @@ namespace dxvk::env {
             return true;
         }
 
+        return false;
+    }
+
+    bool noEnumerateMetaCommands() {
+        if (isElevatorDemo()) {
+            log::info("Returning not supported for NvAPI_D3D12_EnumerateMetaCommands for Elevator demo");
+            return true;
+        }
         return false;
     }
 
