@@ -1,5 +1,6 @@
 #include "nvapi_private.h"
 #include "nvapi_interface.h"
+#include "nvapi_interface_private.h"
 #include "util/util_string.h"
 #include "util/util_log.h"
 
@@ -19,8 +20,14 @@ extern "C" {
             [id](const auto& item) { return item.id == id; });
 
         if (it == std::end(nvapi_interface_table)) {
-            log::info(str::format("NvAPI_QueryInterface (0x", std::hex, id, "): Unknown function ID"));
-            return registry.insert({id, nullptr}).first->second;
+            it = std::find_if(
+                std::begin(nvapi_interface_private_table),
+                std::end(nvapi_interface_private_table),
+                [id](const auto& item) { return item.id == id; });
+            if (it == std::end(nvapi_interface_private_table)) {
+                log::info(str::format("NvAPI_QueryInterface (0x", std::hex, id, "): Unknown function ID"));
+                return registry.insert({id, nullptr}).first->second;
+            }
         }
 
 #define INSERT_AND_RETURN_WHEN_EQUALS(method) \
