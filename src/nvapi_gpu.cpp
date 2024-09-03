@@ -1452,4 +1452,60 @@ extern "C" {
 
         return Ok(str::format(n, " GPCMask support: ", *pSupport));
     }
+
+    NvAPI_Status __cdecl NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32 Info, NvU32 *pSupport) {
+        // Completely unknown. Experimental!
+        constexpr auto n = __func__;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGpu), Info, log::fmt::ptr(pSupport));
+
+        auto returnAddress = _ReturnAddress();
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        if (!pSupport)
+            return InvalidArgument(n);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        auto architectureId = adapter->GetArchitectureId();
+        architectureId = env::needsGpuArchitectureSpoofing(architectureId, returnAddress).value_or(architectureId);
+
+        // The caller should use the amount of GPC's obtained using NvAPI_Get_GPCMask and check the layout of the TPC's
+        // This is ofc impossible to figure out, as this is higly dependant on GPU model.
+        // However, the total amount of TPC's should more or less be SM's / 2. (Each TPC has 2 SM's)
+        // So attempt to use some sort of calculation based on X080 type cards SM amounts, and end up with a correct
+        // Total even if the actual layout is not correct.
+        switch (architectureId) {
+            case NV_GPU_ARCHITECTURE_GB200:
+                *pSupport = 63;
+                break;
+            case NV_GPU_ARCHITECTURE_AD100:
+                if (Info < 4)
+                    *pSupport = 63;
+                else
+                    *pSupport = 63;
+                break;
+            case NV_GPU_ARCHITECTURE_GA100:
+                if (Info == 5)
+                    *pSupport = 63;
+                else
+                    *pSupport = 62;
+                break;
+            case NV_GPU_ARCHITECTURE_TU100:
+                if (Info == 5)
+                    *pSupport = 7;
+                else
+                    *pSupport = 15;
+                break;
+            default:
+                return NotSupported(n);
+        }
+
+        return Ok(str::format(n, " TPCMaskOnGPC info: ", Info, " support: ", *pSupport));
+    }
 }
