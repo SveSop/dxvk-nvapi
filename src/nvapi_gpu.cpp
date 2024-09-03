@@ -1408,4 +1408,48 @@ extern "C" {
 
         return Ok(n, alreadyLoggedOk);
     }
+
+    NvAPI_Status __cdecl NvAPI_GPU_GetGPCMask(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pSupport) {
+        // Completely unknown. Experimental!
+        constexpr auto n = __func__;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGpu), log::fmt::ptr(pSupport));
+
+        auto returnAddress = _ReturnAddress();
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        if (!pSupport)
+            return InvalidArgument(n);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        auto architectureId = adapter->GetArchitectureId();
+        architectureId = env::needsGpuArchitectureSpoofing(architectureId, returnAddress).value_or(architectureId);
+
+        // This is a "bitmask" setting the amount of GPC's. This can vary between different cards, so use X080 type values
+        // Eg. a 4080 has 7 GPC's - 0x01111111 = 127;
+        switch (architectureId) {
+            case NV_GPU_ARCHITECTURE_GB200:
+                *pSupport = 127;
+                break;
+            case NV_GPU_ARCHITECTURE_AD100:
+                *pSupport = 127;
+                break;
+            case NV_GPU_ARCHITECTURE_GA100:
+                *pSupport = 63;
+                break;
+            case NV_GPU_ARCHITECTURE_TU100:
+                *pSupport = 63;
+                break;
+            default:
+                return NotSupported(n);
+        }
+
+        return Ok(str::format(n, " GPCMask support: ", *pSupport));
+    }
 }
