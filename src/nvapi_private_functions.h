@@ -20,6 +20,13 @@ NVAPI_INTERFACE NvAPI_GPU_GetGPCMask(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pS
 ///////////////////////////////////////////////////////////////////////////////
 NVAPI_INTERFACE NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32 Info, NvU32 *pSupport);
 
+///////////////////////////////////////////////////////////////////////////////
+// FUNCTION NAME:   NvAPI_GPU_GetTPCMask
+//
+//! DESCRIPTION:     This API is unknown and experimental
+///////////////////////////////////////////////////////////////////////////////
+NVAPI_INTERFACE NvAPI_GPU_GetTPCMask(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pSupport);
+
 #ifdef __cplusplus
 }
 #endif
