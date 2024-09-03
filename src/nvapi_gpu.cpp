@@ -1318,4 +1318,47 @@ extern "C" {
 
         return Ok(str::format(n, " GPCMask support: ", *pSupport));
     }
+
+    NvAPI_Status __cdecl NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32 Info, NvU32 *pSupport) {
+        // Completely unknown. Experimental!
+        constexpr auto n = __func__;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGpu), Info, log::fmt::ptr(pSupport));
+
+        auto returnAddress = _ReturnAddress();
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        if (!pSupport)
+            return InvalidArgument(n);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        auto architectureId = adapter->GetArchitectureId();
+        architectureId = env::needsGpuArchitectureSpoofing(architectureId, returnAddress).value_or(architectureId);
+
+        // Guesswork - Assuming this is some sort of feature check
+        if (Info == 0)
+            switch (architectureId) {
+                case NV_GPU_ARCHITECTURE_AD100:
+                    *pSupport = 62;
+                    break;
+                case NV_GPU_ARCHITECTURE_GA100:
+                    *pSupport = 62;
+                    break;
+                case NV_GPU_ARCHITECTURE_TU100:
+                    *pSupport = 63;
+                    break;
+                default:
+                    return NotSupported(n);
+            }
+        else if (Info > 0)
+            *pSupport = 63;
+
+        return Ok(str::format(n, " TPCMaskOnGPC info: ", Info, " support: ", *pSupport));
+    }
 }
