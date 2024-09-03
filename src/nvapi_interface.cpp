@@ -224,6 +224,7 @@ extern "C" {
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_Initialize)
         // Non documented functions
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetGPCMask)
+        INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetTPCMaskOnGPC)
         /* End */
 
 #undef INSERT_AND_RETURN_WHEN_EQUALS
