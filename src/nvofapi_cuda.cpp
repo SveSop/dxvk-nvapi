@@ -29,17 +29,41 @@
 #include "../config.h"
 
 using namespace dxvk;
+
+static HMODULE m_ofapiCudaModule = nullptr;
+
 extern "C" {
     NV_OF_STATUS __cdecl NvOFAPICreateInstanceCuda(uint32_t apiVer, void* functionList) {
+        constexpr auto ofapiCuda = "nvofapi64_cuda.dll";
+        constexpr auto cudaFuncName = "NvOFAPICreateInstanceCuda";
+        constexpr auto n = __func__;
+
         uint32_t apiVerMajor = (apiVer & 0xfffffff0) >> 4;
         uint32_t apiVerMinor = (apiVer & 0xf);
-        constexpr auto n = __func__;
 
         if (log::tracing())
             log::trace(n, apiVer, log::fmt::ptr(functionList));
 
         log::info(str::format("OFAPI Client Version: ", apiVerMajor, ".", apiVerMinor));
 
-        return ErrorGeneric(n);
+        if(!m_ofapiCudaModule){
+            m_ofapiCudaModule = LoadLibraryA(ofapiCuda);
+            if (!m_ofapiCudaModule) {
+                log::info(str::format("Failed to load ", ofapiCuda, ": ", GetLastError()));
+                return ErrorGeneric(n);
+            }
+        }
+
+        auto pNvOFAPICreateInstanceCuda = reinterpret_cast<NV_OF_STATUS(__cdecl*)(uint32_t, void*)>(
+            reinterpret_cast<void*>(GetProcAddress(m_ofapiCudaModule, cudaFuncName))
+        );
+
+        if (!pNvOFAPICreateInstanceCuda) {
+            log::info(str::format("Failed to locate ", cudaFuncName, " in ", ofapiCuda, ": ", GetLastError()));
+            FreeLibrary(m_ofapiCudaModule);
+            return ErrorGeneric(n);
+        }
+
+        return pNvOFAPICreateInstanceCuda(apiVer, functionList);
     }
 }
