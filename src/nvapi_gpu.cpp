@@ -1508,4 +1508,41 @@ extern "C" {
 
         return Ok(str::format(n, " TPCMaskOnGPC info: ", Info, " support: ", *pSupport));
     }
+
+    NvAPI_Status __cdecl NvAPI_CUDA_EnumComputeCapableByTopology(NV_CUDA_COMPUTE* computeInfo, NvU32 flags) {
+        // Experimental. Unknown struct!
+        constexpr auto n = __func__;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::ptr(computeInfo), log::fmt::flags(flags));
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        // Unknown struct V1 not supported
+        if (computeInfo->version != NV_CUDA_COMPUTE_VER)
+            return IncompatibleStructVersion(n, computeInfo->version);
+
+        // It seems this function retreives number of adapters first in computeInfo->count
+        // Then it is the callers responsibility to allocate memory to hold info for "count" amount of adapters
+        if (computeInfo->count == 0 && !computeInfo->nodeInfo) {
+            computeInfo->count = nvapiAdapterRegistry->GetAdapterCount();
+            return Ok(n);
+        }
+
+        // This checks if the caller has allocated memory for nodeInfo
+        if (computeInfo->nodeInfo) {
+            for (auto i = 0U; i < computeInfo->count; i++) {
+                auto adapter = nvapiAdapterRegistry->GetAdapter(i);
+                computeInfo->nodeInfo[i].hPhysicalGpu = reinterpret_cast<NvPhysicalGpuHandle>(adapter);
+                computeInfo->nodeInfo[i].data0 = 0x0b;
+                computeInfo->nodeInfo[i].data1 = 0x01;
+            }
+        return Ok(n);
+        }
+
+        // Return not implemented in case memory is not allocated by caller.
+        // TODO: check how windows version of nvapi does this in case memory is not allocated for nodeInfo.
+        return NoImplementation(n);
+    }
 }
