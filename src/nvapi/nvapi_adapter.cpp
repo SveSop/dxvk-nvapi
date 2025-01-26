@@ -317,6 +317,10 @@ namespace dxvk {
         return m_nvml.DeviceGetClockInfo(m_nvmlDevice, type, clock);
     }
 
+    nvmlReturn_t NvapiAdapter::GetNvmlDeviceMaxClockInfo(nvmlClockType_t type, unsigned int* clock) const {
+        return m_nvml.DeviceGetMaxClockInfo(m_nvmlDevice, type, clock);
+    }
+
     nvmlReturn_t NvapiAdapter::GetNvmlDeviceTemperature(nvmlTemperatureSensors_t sensorType, unsigned int* temp) const {
         return m_nvml.DeviceGetTemperature(m_nvmlDevice, sensorType, temp);
     }
