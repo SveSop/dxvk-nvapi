@@ -9,6 +9,7 @@
 #include "util/util_op_code.h"
 #include "util/util_pso_extension.h"
 #include "util/util_string.h"
+#include "util/util_env.h"
 #include "nvShaderExtnEnums.h"
 
 extern "C" {
@@ -44,6 +45,8 @@ extern "C" {
 
         if (log::tracing())
             log::trace(n, log::fmt::ptr(pDevice), log::fmt::ptr(pNumMetaCommands), log::fmt::ptr(pDescs));
+
+        if (env::noEnumerateMetaCommands()) return NotSupported(n);
 
         if (!pDevice || !pNumMetaCommands)
             return InvalidArgument(n);
