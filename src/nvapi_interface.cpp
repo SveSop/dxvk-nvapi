@@ -89,6 +89,7 @@ extern "C" {
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_LaunchCubinShader)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_DestroyCubinComputeShader)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_IsFatbinPTXSupported)
+        INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D12_SetNvShaderExtnSlotSpace)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_CreateUnorderedAccessView)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_CreateSamplerState)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_D3D11_GetCudaTextureObject)
