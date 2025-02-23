@@ -1187,6 +1187,51 @@ extern "C" {
         return Ok(n, alreadyLoggedOk);
     }
 
+    NvAPI_Status __cdecl NvAPI_GPU_GetTachReading(NvPhysicalGpuHandle hPhysicalGPU, NvU32 *pValue) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedNoNvml = false;
+        thread_local bool alreadyLoggedHandleInvalidated = false;
+        thread_local bool alreadyLoggedOk = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGPU), log::fmt::ptr(pValue));
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        if (!pValue)
+            return InvalidArgument(n);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGPU);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        if (!adapter->HasNvml())
+            return NoImplementation(n, alreadyLoggedNoNvml);
+
+        if (!adapter->HasNvmlDevice())
+            return HandleInvalidated(str::format(n, ": NVML available but current adapter is not NVML compatible"), alreadyLoggedHandleInvalidated);
+
+        nvmlFanSpeedInfo_t fanSpeed{};
+        fanSpeed.version = nvmlFanSpeedInfo_v1;
+        auto result = adapter->GetNvmlDeviceGetFanSpeedRPM(&fanSpeed);
+        switch (result) {
+            case NVML_SUCCESS:
+                *pValue = fanSpeed.speed;
+                if (log::tracing())
+                    log::trace(n, ": Speed: ", fanSpeed.speed);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                return NotSupported(n);
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", adapter->GetNvmlErrorString(result)));
+        }
+
+        return Ok(n, alreadyLoggedOk);
+    }
+
     NvAPI_Status __cdecl NvAPI_GPU_GetPstates20(NvPhysicalGpuHandle hPhysicalGpu, NV_GPU_PERF_PSTATES20_INFO* pPstatesInfo) {
         constexpr auto n = __func__;
         thread_local bool alreadyLoggedNoNvml = false;
