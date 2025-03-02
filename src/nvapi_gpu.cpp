@@ -1545,4 +1545,97 @@ extern "C" {
         // TODO: check how windows version of nvapi does this in case memory is not allocated for nodeInfo.
         return NoImplementation(n);
     }
+
+    NvAPI_Status __cdecl NvAPI_GPU_GetPstatesInfo(NvPhysicalGpuHandle hPhysicalGpu, NV_GPU_PERF_PSTATES_INFO *pPstatesInfo) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedNoNvml = false;
+        thread_local bool alreadyLoggedHandleInvalidated = false;
+        thread_local bool alreadyLoggedOk = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGpu), log::fmt::ptr(pPstatesInfo));
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        if (!pPstatesInfo)
+            return InvalidArgument(n);
+
+        if(pPstatesInfo->version != NV_GPU_PERF_PSTATES_INFO_VER1 && pPstatesInfo->version != NV_GPU_PERF_PSTATES_INFO_VER2 && pPstatesInfo->version != NV_GPU_PERF_PSTATES_INFO_VER)
+            return IncompatibleStructVersion(n, pPstatesInfo->version);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        auto nvml = adapter->GetNvml();
+        if (!nvml) {
+            if (env::needsSucceededGpuQuery())
+                return Ok(n, alreadyLoggedOk);
+
+            return NoImplementation(n, alreadyLoggedNoNvml);
+        }
+
+        auto nvmlDevice = adapter->GetNvmlDevice();
+        if (!nvmlDevice)
+            return HandleInvalidated(str::format(n, ": NVML available but current adapter is not NVML compatible"), alreadyLoggedHandleInvalidated);
+
+        // Set some default values. Only setting 1 performance mode - P0
+        NV_GPU_PERF_PSTATE_ID pState = NVAPI_GPU_PERF_PSTATE_P0;
+        pPstatesInfo->flags = 2; // set flags 00000010 - Dynamic pstate capable
+        pPstatesInfo->numPstates = 1;
+        pPstatesInfo->numClocks = 3;
+        pPstatesInfo->numVoltages = 0;
+        pPstatesInfo->pstates[pState].flags = 1; // set flags 00000001 - PCIE GEN2, not overclocked
+        pPstatesInfo->pstates[pState].pstateId = NVAPI_GPU_PERF_PSTATE_P0;
+
+        unsigned int clock{};
+
+        // Do nvml call on a "per clock unit" to get the clock
+        auto resultGpu = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_GRAPHICS, &clock);
+        switch (resultGpu) {
+            case NVML_SUCCESS:
+                pPstatesInfo->pstates[pState].clocks[0].freq = (clock * 1000);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                break;
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", nvml->ErrorString(resultGpu)));
+        }
+
+        auto resultMem = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_MEM, &clock);
+        switch (resultMem) {
+            case NVML_SUCCESS:
+                pPstatesInfo->pstates[pState].clocks[1].freq = (clock * 1000);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                break;
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", nvml->ErrorString(resultMem)));
+        }
+
+        auto resultVid = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_VIDEO, &clock);
+        switch (resultVid) {
+            case NVML_SUCCESS:
+                pPstatesInfo->pstates[pState].clocks[2].freq = (clock * 1000);
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                break;
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", nvml->ErrorString(resultVid)));
+        }
+
+        if (resultGpu == NVML_ERROR_NOT_SUPPORTED
+            && resultMem == NVML_ERROR_NOT_SUPPORTED
+            && resultVid == NVML_ERROR_NOT_SUPPORTED)
+            return NotSupported(n);
+
+        return Ok(n, alreadyLoggedOk);
+    }
 }
