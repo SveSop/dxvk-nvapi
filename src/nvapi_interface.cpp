@@ -227,6 +227,7 @@ extern "C" {
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetTPCMaskOnGPC)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_CUDA_EnumComputeCapableByTopology)
         INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetPstatesInfo)
+        INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_ClientFanCoolersGetStatus)
         /* End */
 
 #undef INSERT_AND_RETURN_WHEN_EQUALS

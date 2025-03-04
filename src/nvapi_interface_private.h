@@ -6,4 +6,5 @@ struct NVAPI_INTERFACE_TABLE nvapi_interface_private_table[] = {
     { "NvAPI_GPU_GetTPCMaskOnGPC", 0xed74af30 },
     { "NvAPI_CUDA_EnumComputeCapableByTopology", 0x36e39e6b },
     { "NvAPI_GPU_GetPstatesInfo", 0xba94c56e },
+    { "NvAPI_GPU_ClientFanCoolersGetStatus", 0x35aed5e8 },
 };
