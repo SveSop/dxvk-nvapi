@@ -862,8 +862,10 @@ TEST_CASE("Sysinfo methods succeed", "[.sysinfo]") {
             uint32_t expectedTensorCores;
         };
         auto args = GENERATE(
+            Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2600, VK_KHR_COMPUTE_SHADER_DERIVATIVES_EXTENSION_NAME, 84, 336},
             Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2600, VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME, 76, 304},
-            Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2000, VK_KHR_FRAGMENT_SHADER_BARYCENTRIC_EXTENSION_NAME, 76, 304},
+            Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2000, VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME, 70, 280},
+            Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2000, VK_KHR_FRAGMENT_SHADER_BARYCENTRIC_EXTENSION_NAME, 46, 368},
             Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2000, VK_NVX_IMAGE_VIEW_HANDLE_EXTENSION_NAME, 0, 0},
             Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2000, VK_NV_CLIP_SPACE_W_SCALING_EXTENSION_NAME, 0, 0},
             Data{VK_DRIVER_ID_NVIDIA_PROPRIETARY, 0x2000, VK_NV_VIEWPORT_ARRAY2_EXTENSION_NAME, 0, 0},
@@ -882,6 +884,8 @@ TEST_CASE("Sysinfo methods succeed", "[.sysinfo]") {
                         vkProps.props->deviceID = args.deviceId;
                         if (args.extensionName == VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME)
                             vkProps.fragmentShadingRateProps->primitiveFragmentShadingRateWithMultipleViewports = VK_TRUE;
+                        if (args.extensionName == VK_KHR_COMPUTE_SHADER_DERIVATIVES_EXTENSION_NAME)
+                            vkProps.computeShaderDerivativesProps->meshAndTaskShaderDerivatives = VK_TRUE;
                     }));
 
         REQUIRE(NvAPI_Initialize() == NVAPI_OK);

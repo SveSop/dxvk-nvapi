@@ -685,6 +685,8 @@ extern "C" {
         if (log::tracing())
             log::trace(n, log::fmt::hnd(hPhysicalGpu), log::fmt::ptr(pGpuInfo));
 
+        auto returnAddress = _ReturnAddress();
+
         if (!nvapiAdapterRegistry)
             return ApiNotInitialized(n);
 
@@ -702,15 +704,37 @@ extern "C" {
                 pGpuInfoV1->version = NV_GPU_INFO_VER1;
                 break;
             }
-            case NV_GPU_INFO_VER2:
+            case NV_GPU_INFO_VER2: {
                 *pGpuInfo = {};
                 pGpuInfo->version = NV_GPU_INFO_VER2;
-                if (adapter->GetArchitectureId() >= NV_GPU_ARCHITECTURE_TU100) {
-                    // Values are taken from RTX4080
-                    pGpuInfo->rayTracingCores = 76;
-                    pGpuInfo->tensorCores = 304;
+                auto architectureId = adapter->GetArchitectureId();
+                architectureId = env::needsGpuArchitectureSpoofing(architectureId, returnAddress).value_or(architectureId);
+                switch (architectureId) {
+                    case NV_GPU_ARCHITECTURE_AD100:
+                        // Values are taken from RTX4080
+                        pGpuInfo->rayTracingCores = 76;
+                        pGpuInfo->tensorCores = 304;
+                        break;
+                    case NV_GPU_ARCHITECTURE_GA100:
+                        // Values are taken from RTX3080
+                        pGpuInfo->rayTracingCores = 70;
+                        pGpuInfo->tensorCores = 280;
+                        break;
+                    case NV_GPU_ARCHITECTURE_TU100:
+                        // Values are tekane from RTX2080
+                        pGpuInfo->rayTracingCores = 46;
+                        pGpuInfo->tensorCores = 368;
+                        break;
+                    default:
+                        // Values are taken from RTX5080
+                        if (architectureId >= NV_GPU_ARCHITECTURE_GB200) {
+                            pGpuInfo->rayTracingCores = 84;
+                            pGpuInfo->tensorCores = 336;
+                        }
+                        break;
                 }
                 break;
+            }
             default:
                 return IncompatibleStructVersion(n, pGpuInfo->version);
         }
