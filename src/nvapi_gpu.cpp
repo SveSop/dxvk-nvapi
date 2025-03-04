@@ -1653,4 +1653,94 @@ extern "C" {
 
         return Ok(n, alreadyLoggedOk);
     }
+
+    NvAPI_Status __cdecl NvAPI_GPU_ClientFanCoolersGetStatus(NvPhysicalGpuHandle hPhysicalGpu, NV_GPU_FANCOOLERSTATUS* pFanCoolerStatus) {
+        constexpr auto n = __func__;
+        thread_local bool alreadyLoggedNoNvml = false;
+        thread_local bool alreadyLoggedHandleInvalidated = false;
+        thread_local bool alreadyLoggedOk = false;
+
+        if (log::tracing())
+            log::trace(n, log::fmt::hnd(hPhysicalGpu), log::fmt::ptr(pFanCoolerStatus));
+
+        if (!nvapiAdapterRegistry)
+            return ApiNotInitialized(n);
+
+        if (!pFanCoolerStatus)
+            return InvalidArgument(n);
+
+        if(pFanCoolerStatus->version != NV_GPU_FANCOOLERSTATUS_VER)
+            return IncompatibleStructVersion(n, pFanCoolerStatus->version);
+
+        auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+        if (!nvapiAdapterRegistry->IsAdapter(adapter))
+            return ExpectedPhysicalGpuHandle(n);
+
+        auto nvml = adapter->GetNvml();
+        if (!nvml) {
+            if (env::needsSucceededGpuQuery())
+                return Ok(n, alreadyLoggedOk);
+
+            return NoImplementation(n, alreadyLoggedNoNvml);
+        }
+
+        auto nvmlDevice = adapter->GetNvmlDevice();
+        if (!nvmlDevice)
+            return HandleInvalidated(str::format(n, ": NVML available but current adapter is not NVML compatible"), alreadyLoggedHandleInvalidated);
+
+        unsigned int numFans{};
+        switch (auto resultNum = nvml->DeviceGetNumFans(nvmlDevice, &numFans)) {
+            case NVML_SUCCESS:
+                pFanCoolerStatus->fanCount = numFans;
+                break;
+            case NVML_ERROR_NOT_SUPPORTED:
+                return NotSupported(n);
+            case NVML_ERROR_GPU_IS_LOST:
+                return HandleInvalidated(n);
+            default:
+                return Error(str::format(n, ": ", nvml->ErrorString(resultNum)));
+        }
+
+        unsigned int speed{};
+        nvmlFanSpeedInfo_t fanSpeedInfo{};
+        fanSpeedInfo.version = nvmlFanSpeedInfo_v1;
+
+        for (unsigned int i = 0; i < numFans; i++) {
+            auto resultSpeed = nvml->DeviceGetFanSpeed_v2(nvmlDevice, i, &speed);
+            switch (resultSpeed) {
+                case NVML_SUCCESS:
+                    pFanCoolerStatus->fanCoolersStatusEntries[i].coolerId = i;
+                    pFanCoolerStatus->fanCoolersStatusEntries[i].currentLevel = speed;
+                    pFanCoolerStatus->fanCoolersStatusEntries[i].minimumLevel = 25;  // Assume some starting %
+                    pFanCoolerStatus->fanCoolersStatusEntries[i].maximumLevel = 100; // Hopefully 100%
+                    break;
+                case NVML_ERROR_NOT_SUPPORTED:
+                    break;
+                case NVML_ERROR_GPU_IS_LOST:
+                    return HandleInvalidated(n);
+                default:
+                    return Error(str::format(n, ": ", nvml->ErrorString(resultSpeed)));
+            }
+
+            fanSpeedInfo.fan = i;
+            auto resultRPM = nvml->DeviceGetFanSpeedRPM(nvmlDevice, &fanSpeedInfo);
+            switch (resultRPM) {
+                case NVML_SUCCESS:
+                    pFanCoolerStatus->fanCoolersStatusEntries[i].currentRPM = fanSpeedInfo.speed;
+                    break;
+                case NVML_ERROR_NOT_SUPPORTED:
+                    break;
+                case NVML_ERROR_GPU_IS_LOST:
+                    return HandleInvalidated(n);
+                default:
+                    return Error(str::format(n, ": ", nvml->ErrorString(resultRPM)));
+            }
+
+            if (resultSpeed == NVML_ERROR_NOT_SUPPORTED
+            && resultRPM == NVML_ERROR_NOT_SUPPORTED)
+            return NotSupported(n);
+        }
+
+        return Ok(n, alreadyLoggedOk);
+    }
 }
