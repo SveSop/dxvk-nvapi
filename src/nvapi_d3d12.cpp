@@ -26,6 +26,12 @@ extern "C" {
 
         // VKD3D does not know any NVIDIA intrinsics, but NV_EXTN_OP_UINT64_ATOMIC is required for some UnrealEngine products
         switch (opCode) {
+            case NV_EXTN_OP_SHFL:
+                *pSupported = true;
+                break;
+            case NV_EXTN_OP_FP16_ATOMIC:
+                *pSupported = true;
+                break;
             case NV_EXTN_OP_UINT64_ATOMIC:
                 *pSupported = true;
                 break;
