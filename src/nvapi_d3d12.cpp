@@ -572,7 +572,7 @@ extern "C" {
 
     NvAPI_Status __cdecl NvAPI_D3D12_SetNvShaderExtnSlotSpaceLocalThread(IUnknown* pDev, NvU32 uavSlot, NvU32 uavSpace) {
         constexpr auto n = __func__;
-        thread_local bool alreadyLoggedNoImplementation = false;
+        thread_local bool alreadyLoggedOk = false;
 
         if (log::tracing())
             log::trace(n, log::fmt::ptr(pDev), uavSlot, uavSpace);
@@ -580,7 +580,7 @@ extern "C" {
         if (!pDev)
             return InvalidArgument(n);
 
-        return NoImplementation(n, alreadyLoggedNoImplementation);
+        return Ok(n, alreadyLoggedOk);
     }
 
     bool SetDepthBoundsTestValues(ID3D12GraphicsCommandList* commandList, const float minDepth, const float maxDepth) {
