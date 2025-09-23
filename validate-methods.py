@@ -13,7 +13,7 @@ if len(sys.argv) < 3:
 
 expectedMethods = []
 regex = re.compile("^ *NvAPI_Status +__cdecl +(\\w+)")
-for i in range(1, len(sys.argv) - 2):
+for i in range(1, len(sys.argv) - 3):
     with open(sys.argv[i]) as file:
         for line in file:
             result = regex.match(line)
@@ -23,7 +23,7 @@ for i in range(1, len(sys.argv) - 2):
 fetch = False
 foundMethods = []
 regex = re.compile("^ *\\w+\\((\\w+)\\)")
-with open(sys.argv[len(sys.argv) - 2]) as file:
+with open(sys.argv[len(sys.argv) - 3]) as file:
     for line in file:
         if line.strip() == "/* End */":
             fetch = False
@@ -36,6 +36,13 @@ with open(sys.argv[len(sys.argv) - 2]) as file:
 
 availableMethods = []
 regex = re.compile("^ *{ \\\"(\\w+)\\\", \\w+ },$")
+
+with open(sys.argv[len(sys.argv) - 2]) as file:
+    for line in file:
+        result = regex.match(line)
+        if result:
+            availableMethods.append(result.group(1))
+
 with open(sys.argv[len(sys.argv) - 1]) as file:
     for line in file:
         result = regex.match(line)
