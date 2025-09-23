@@ -51,6 +51,7 @@
 #define NVAPI_INTERNAL 1
 #define __NVAPI_EMPTY_SAL
 #include <nvapi.h>
+#include "nvapi_private_functions.h"
 #undef __NVAPI_EMPTY_SAL
 #include <nvapi_lite_salend.h>
 
