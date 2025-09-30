@@ -10,6 +10,7 @@
 #include "util/util_pso_extension.h"
 #include "util/util_string.h"
 #include "util/util_env.h"
+#include "nvShaderExtnEnums.h"
 
 extern "C" {
     using namespace dxvk;
@@ -23,10 +24,20 @@ extern "C" {
         if (!pDevice || !pSupported)
             return InvalidArgument(n);
 
-        // VKD3D-Proton does not know any NVIDIA intrinsics
-        *pSupported = false;
+        // VKD3D does not know any NVIDIA intrinsics, but NV_EXTN_OP_UINT64_ATOMIC is required for some UnrealEngine products
+        switch (opCode) {
+            case NV_EXTN_OP_UINT64_ATOMIC:
+                *pSupported = true;
+                break;
+            case NV_EXTN_OP_GET_SHADING_RATE:
+                *pSupported = true;
+                break;
+            default:
+                *pSupported = false;
+                break;
+        }
 
-        return Ok(str::format(n, " (", opCode, "/", fromCode(opCode), ")"));
+        return Ok(str::format(n, " (", opCode, "/", fromCode(opCode), ")", " ", std::boolalpha, *pSupported));
     }
 
     NvAPI_Status __cdecl NvAPI_D3D12_EnumerateMetaCommands(ID3D12Device* pDevice, NvU32* pNumMetaCommands, NVAPI_META_COMMAND_DESC* pDescs) {
