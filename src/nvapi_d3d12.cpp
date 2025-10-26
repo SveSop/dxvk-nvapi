@@ -46,6 +46,8 @@ extern "C" {
         if (log::tracing())
             log::trace(n, log::fmt::ptr(pDevice), log::fmt::ptr(pNumMetaCommands), log::fmt::ptr(pDescs));
 
+        if (env::noEnumerateMetaCommands()) return NotSupported(n);
+
         if (!pDevice || !pNumMetaCommands)
             return InvalidArgument(n);
 
