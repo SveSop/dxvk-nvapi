@@ -1113,7 +1113,6 @@ extern "C" {
 
     NvAPI_Status __cdecl NvAPI_GPU_GetAllClockFrequencies(NvPhysicalGpuHandle hPhysicalGpu, NV_GPU_CLOCK_FREQUENCIES* pClkFreqs) {
         constexpr auto n = __func__;
-        thread_local bool alreadyLoggedNotSupported = false;
         thread_local bool alreadyLoggedNoNvml = false;
         thread_local bool alreadyLoggedHandleInvalidated = false;
         thread_local bool alreadyLoggedOk = false;
@@ -1129,11 +1128,6 @@ extern "C" {
 
         if (pClkFreqs->version != NV_GPU_CLOCK_FREQUENCIES_VER_1 && pClkFreqs->version != NV_GPU_CLOCK_FREQUENCIES_VER_2 && pClkFreqs->version != NV_GPU_CLOCK_FREQUENCIES_VER_3)
             return IncompatibleStructVersion(n, pClkFreqs->version);
-
-        // Only check for CURRENT_FREQ, and not for the other types i.e. BOOST or DEFAULT for now
-        if ((pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_2 || pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_3)
-            && pClkFreqs->ClockType != static_cast<NvU32>(NV_GPU_CLOCK_FREQUENCIES_CURRENT_FREQ))
-            return NotSupported(n, alreadyLoggedNotSupported);
 
         auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
         if (!nvapiAdapterRegistry->IsAdapter(adapter))
@@ -1164,7 +1158,16 @@ extern "C" {
         unsigned int clock{};
         // Seemingly we need to do nvml call on a "per clock unit" to get the clock
         // Set the availability of the clock to TRUE and the nvml read clock in the nvapi struct
-        auto resultGpu = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_GRAPHICS, &clock);
+
+        // Check if we only need "current" clock, and use "MaxClock" obtained from NVML for BOOST and BASE clocks.
+        // TODO: Would be nice to use nvmlDeviceGetClock with NVML_CLOCK_ID_APP_CLOCK_DEFAULT or NVML_CLOCK_ID_CUSTOMER_BOOST_MAX
+        nvmlReturn_t resultGpu;
+        if ((pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_2 || pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_3)
+            && pClkFreqs->ClockType != static_cast<NvU32>(NV_GPU_CLOCK_FREQUENCIES_CURRENT_FREQ))
+            resultGpu = nvml->DeviceGetMaxClockInfo(nvmlDevice, NVML_CLOCK_GRAPHICS, &clock);
+        else
+            resultGpu = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_GRAPHICS, &clock);
+
         switch (resultGpu) {
             case NVML_SUCCESS:
                 switch (pClkFreqs->version) {
@@ -1193,7 +1196,13 @@ extern "C" {
                 return Error(str::format(n, ": ", nvml->ErrorString(resultGpu)));
         }
 
-        auto resultMem = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_MEM, &clock);
+        nvmlReturn_t resultMem;
+        if ((pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_2 || pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_3)
+            && pClkFreqs->ClockType != static_cast<NvU32>(NV_GPU_CLOCK_FREQUENCIES_CURRENT_FREQ))
+            resultMem = nvml->DeviceGetMaxClockInfo(nvmlDevice, NVML_CLOCK_MEM, &clock);
+        else
+            resultMem = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_MEM, &clock);
+
         switch (resultMem) {
             case NVML_SUCCESS:
                 switch (pClkFreqs->version) {
@@ -1220,7 +1229,13 @@ extern "C" {
                 return Error(str::format(n, ": ", nvml->ErrorString(resultMem)));
         }
 
-        auto resultVid = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_VIDEO, &clock);
+        nvmlReturn_t resultVid;
+        if ((pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_2 || pClkFreqs->version == NV_GPU_CLOCK_FREQUENCIES_VER_3)
+            && pClkFreqs->ClockType != static_cast<NvU32>(NV_GPU_CLOCK_FREQUENCIES_CURRENT_FREQ))
+            resultVid = nvml->DeviceGetMaxClockInfo(nvmlDevice, NVML_CLOCK_VIDEO, &clock);
+        else
+            resultVid = nvml->DeviceGetClockInfo(nvmlDevice, NVML_CLOCK_VIDEO, &clock);
+
         switch (resultVid) {
             case NVML_SUCCESS:
                 switch (pClkFreqs->version) {
