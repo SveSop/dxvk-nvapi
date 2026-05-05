@@ -1535,3 +1535,55 @@ NVAPI_FUNCTION NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32
 
     return Ok(str::format(n, " TPCMaskOnGPC info: ", Info, " support: ", *pSupport));
 }
+
+NVAPI_FUNCTION NvAPI_CUDA_EnumComputeCapableByTopology(NV_CUDA_COMPUTE* computeInfo, NvU32 flags) {
+    // Experimental. Unknown struct!
+    constexpr auto n = __func__;
+
+    if (log::tracing())
+        log::trace(n, log::fmt::ptr(computeInfo), log::fmt::flags(flags));
+
+    if (!nvapiAdapterRegistry)
+        return ApiNotInitialized(n);
+
+    // Unknown struct V1 not supported
+    if (computeInfo->version != NV_CUDA_COMPUTE_VER)
+        return IncompatibleStructVersion(n, computeInfo->version);
+
+    auto cudaCapableGpus = std::vector<NvPhysicalGpuHandle>(0);
+    for (auto i = 0U; i < nvapiAdapterRegistry->GetAdapterCount(); i++) {
+        auto adapter = nvapiAdapterRegistry->GetAdapter(i);
+        if (!adapter->HasNvProprietaryDriver() || adapter->GetArchitectureId() < NV_GPU_ARCHITECTURE_GM000) // Maxwell is the oldest generation we can detect
+            continue;
+
+        cudaCapableGpus.push_back(reinterpret_cast<NvPhysicalGpuHandle>(adapter));
+    }
+
+    // It seems this function retreives number of adapters first in computeInfo->count
+    // Then it is the callers responsibility to allocate memory to hold info for "count" amount of adapters
+    if (!computeInfo->count) {
+        computeInfo->count = cudaCapableGpus.size();
+        return Ok(n);
+    }
+
+    // This checks if the caller has allocated memory for nodeInfo
+    if (!computeInfo->nodeInfo)
+        return InvalidArgument(n);
+
+    // Write required adapter info - Assume caller has only allocated size gpuCount to the array
+    // Compare possible size given in the array vs. adapters available
+    auto count = computeInfo->count < cudaCapableGpus.size()
+            ? computeInfo->count
+            : cudaCapableGpus.size();
+
+    for (auto i = 0U; i < count; i++) {
+        computeInfo->nodeInfo[i].hPhysicalGpu = cudaCapableGpus[i];
+        computeInfo->nodeInfo[i].data0 = 0x0b; // Speculative value
+        computeInfo->nodeInfo[i].data1 = 0x01; // Speculative value
+    }
+
+    // Return adaptercount
+    computeInfo->count = cudaCapableGpus.size();
+
+    return Ok(n);
+}

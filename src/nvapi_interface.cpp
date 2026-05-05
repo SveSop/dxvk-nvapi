@@ -229,6 +229,7 @@ NVAPI_QUERY_INTERFACE nvapi_QueryInterface(NvU32 id) {
     // Non documented functions
     INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetGPCMask)
     INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetTPCMaskOnGPC)
+    INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_CUDA_EnumComputeCapableByTopology)
     /* End */
 
 #undef INSERT_AND_RETURN_WHEN_EQUALS
