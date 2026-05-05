@@ -50,6 +50,9 @@ NVAPI_FUNCTION NvAPI_D3D12_EnumerateMetaCommands(ID3D12Device* pDevice, NvU32* p
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pDevice), log::fmt::ptr(pNumMetaCommands), log::fmt::ptr(pDescs));
 
+    if (env::noEnumerateMetaCommands())
+        return NotSupported(n);
+
     if (!pDevice || !pNumMetaCommands)
         return InvalidArgument(n);
 
