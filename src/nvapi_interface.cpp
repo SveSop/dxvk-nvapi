@@ -226,6 +226,8 @@ NVAPI_QUERY_INTERFACE nvapi_QueryInterface(NvU32 id) {
     INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GetErrorMessage)
     INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_Unload)
     INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_Initialize)
+    // Non documented functions
+    INSERT_AND_RETURN_WHEN_EQUALS(NvAPI_GPU_GetGPCMask)
     /* End */
 
 #undef INSERT_AND_RETURN_WHEN_EQUALS
