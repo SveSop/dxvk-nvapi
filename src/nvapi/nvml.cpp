@@ -29,6 +29,8 @@ namespace dxvk {
         GETPROCADDR(nvmlDeviceGetMaxClockInfo);
         GETPROCADDR(nvmlDeviceGetTemperatureV);
         GETPROCADDR(nvmlDeviceGetThermalSettings);
+        GETPROCADDR(nvmlDeviceGetNumFans);
+        GETPROCADDR(nvmlDeviceGetFanSpeed_v2);
         GETPROCADDR(nvmlDeviceGetFanSpeedRPM);
         GETPROCADDR(nvmlDeviceGetPerformanceState);
         GETPROCADDR(nvmlDeviceGetUtilizationRates);
@@ -112,6 +114,18 @@ namespace dxvk {
     nvmlReturn_t Nvml::DeviceGetThermalSettings(nvmlDevice_t device, unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings) const {
         return m_nvmlDeviceGetThermalSettings
             ? m_nvmlDeviceGetThermalSettings(device, sensorIndex, pThermalSettings)
+            : NVML_ERROR_FUNCTION_NOT_FOUND;
+    }
+
+    nvmlReturn_t Nvml::DeviceGetNumFans(nvmlDevice_t device, unsigned int* numFans) const {
+        return m_nvmlDeviceGetNumFans
+            ? m_nvmlDeviceGetNumFans(device, numFans)
+            : NVML_ERROR_FUNCTION_NOT_FOUND;
+    }
+
+    nvmlReturn_t Nvml::DeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int* speed) const {
+        return m_nvmlDeviceGetFanSpeed_v2
+            ? m_nvmlDeviceGetFanSpeed_v2(device, fan, speed)
             : NVML_ERROR_FUNCTION_NOT_FOUND;
     }
 
