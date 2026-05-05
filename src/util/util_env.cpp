@@ -139,6 +139,10 @@ namespace dxvk::env {
         return false;
     }
 
+    bool isElevatorDemo() {
+        return getExecutableName() == std::string("ElevatorDemo-Win64-Shipping.exe");
+    }
+
     bool needsSucceededGpuQuery() {
         if (getExecutableName() == std::string("tlou-i.exe") || getExecutableName() == std::string("tlou-i-l.exe")) {
             log::info("Faking GPU query success due to detecting tlou-i.exe/tlou-i-l.exe (The Last of Us Part I)");
@@ -206,6 +210,14 @@ namespace dxvk::env {
             return true;
         }
 
+        return false;
+    }
+
+    bool noEnumerateMetaCommands() {
+        if (isElevatorDemo()) {
+            log::info("Returning not supported for NvAPI_D3D12_EnumerateMetaCommands for Elevator demo");
+            return true;
+        }
         return false;
     }
 
