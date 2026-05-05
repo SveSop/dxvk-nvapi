@@ -19,5 +19,7 @@ namespace dxvk::env {
 
     bool isD3d12NvShaderExtnEnabled();
 
+    bool noEnumerateMetaCommands();
+
     std::optional<NV_GPU_ARCHITECTURE_ID> needsGpuArchitectureSpoofing(NV_GPU_ARCHITECTURE_ID architectureId, void* returnAddress);
 }
