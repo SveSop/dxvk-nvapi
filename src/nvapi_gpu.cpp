@@ -675,7 +675,7 @@ NVAPI_FUNCTION NvAPI_GPU_CudaEnumComputeCapableGpus(NV_COMPUTE_GPU_TOPOLOGY* pCo
     if (!pComputeTopo)
         return InvalidArgument(n);
 
-    if (pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER1)
+    if (pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER1 && pComputeTopo->version != NV_COMPUTE_GPU_TOPOLOGY_VER)
         return IncompatibleStructVersion(n, pComputeTopo->version);
 
     auto cudaCapableGpus = std::vector<NvPhysicalGpuHandle>(0);
@@ -698,6 +698,34 @@ NVAPI_FUNCTION NvAPI_GPU_CudaEnumComputeCapableGpus(NV_COMPUTE_GPU_TOPOLOGY* pCo
                 pComputeTopoV1->computeGpus[i].hPhysicalGpu = cudaCapableGpus[i];
                 pComputeTopoV1->computeGpus[i].flags = flags;
             }
+            break;
+        }
+        case NV_COMPUTE_GPU_TOPOLOGY_VER: {
+            auto pComputeTopoV2 = reinterpret_cast<NV_COMPUTE_GPU_TOPOLOGY_V2*>(pComputeTopo);
+
+            // If caller only wants to check gpuCount, but has not allocated memory for computeGpus
+            if (!pComputeTopoV2->gpuCount) {
+                pComputeTopoV2->gpuCount = cudaCapableGpus.size();
+                return Ok(n);
+            }
+            // Safeguard in case caller has not allocated memory for computeGpus struct
+            if (!pComputeTopoV2->computeGpus)
+                return InvalidArgument(n);
+
+            // Write required adapter info - Assume caller has only allocated size gpuCount to the array
+            // Compare possible size given in the array vs. adapters available
+            auto count = pComputeTopoV2->gpuCount < cudaCapableGpus.size()
+            ? pComputeTopoV2->gpuCount
+            : cudaCapableGpus.size();
+
+            // Fill in physical info in the array
+            for (auto i = 0U; i < count; i++) {
+                pComputeTopoV2->computeGpus[i].hPhysicalGpu = cudaCapableGpus[i];
+                pComputeTopoV2->computeGpus[i].flags = flags;
+            }
+
+            // Return total number of adapters in gpuCount
+            pComputeTopoV2->gpuCount = cudaCapableGpus.size();
             break;
         }
         default:
