@@ -36,6 +36,22 @@ inline static NV_HDR_MODE ColorSpaceToHDRMode(DXGI_COLOR_SPACE_TYPE colorspace) 
     }
 }
 
+inline static NV_BPC ColorDepthToBpc(uint16_t colorDepth) {
+    switch (colorDepth) {
+        case 6:
+            return NV_BPC_6;
+        case 8:
+            return NV_BPC_8;
+        default:
+        case 10:
+            return NV_BPC_10;
+        case 12:
+            return NV_BPC_12;
+        case 16:
+            return NV_BPC_16;
+    }
+}
+
 NVAPI_FUNCTION NvAPI_Disp_GetHdrCapabilities(NvU32 displayId, NV_HDR_CAPABILITIES* pHdrCapabilities) {
     constexpr auto n = __func__;
 
@@ -201,7 +217,7 @@ NVAPI_FUNCTION NvAPI_Disp_HdrColorControl(NvU32 displayId, NV_HDR_COLOR_DATA* pH
             // NV_DYNAMIC_RANGE_CEA is RGB/YCbCr limited range
             // NV_DYNAMIC_RANGE_AUTO automatically chooses something (probably reads some EDID/CTA-861 entries)
             pHDRColorDataV2->hdrDynamicRange = NV_DYNAMIC_RANGE_VESA;
-            pHDRColorDataV2->hdrBpc = data.BitsPerColor;
+            pHDRColorDataV2->hdrBpc = ColorDepthToBpc(data.ColorDepth);
         } else {
             // Ignoring some extended properties of HDRColorDataV2.
             // Nothing to set. It's all random useless garbage that you would NEVER trust an app to set.
