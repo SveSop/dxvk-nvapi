@@ -12,10 +12,14 @@ namespace dxvk {
 
     void NvapiOutput::Initialize(Com<IDXGIOutput>& dxgiOutput) {
         DXGI_OUTPUT_DESC desc{};
-        dxgiOutput->GetDesc(&desc);
+        dxgiOutput->GetDesc(&desc); // TODO: Check return code
 
         m_deviceName = str::fromws(desc.DeviceName);
         log::info(str::format("NvAPI Output: ", m_deviceName));
+
+        m_displayMode.Top = desc.DesktopCoordinates.top;
+        m_displayMode.Left = desc.DesktopCoordinates.left;
+        // DXVK reports no rotation
 
         MONITORINFO info{};
         info.cbSize = sizeof(MONITORINFO);
@@ -23,13 +27,24 @@ namespace dxvk {
 
         m_isPrimary = info.dwFlags & MONITORINFOF_PRIMARY;
 
+        // Use FindClosestMatchingMode() for finding the current resolution and refresh rate, since it returns the active mode for the output when mode is default/zeroed
+        DXGI_MODE_DESC mode{};
+        DXGI_MODE_DESC closestMode{};
+        auto device = dxgiOutput.ptr(); // DXVK doesn't care about the device as long as it isn't nullptr when querying with DXGI_FORMAT_UNKNOWN
+        if (SUCCEEDED(dxgiOutput->FindClosestMatchingMode(&mode, &closestMode, device))) {
+            m_displayMode.Width = closestMode.Width;
+            m_displayMode.Height = closestMode.Height;
+            if (closestMode.RefreshRate.Denominator > 0)
+                m_displayMode.RefreshRate = closestMode.RefreshRate.Numerator / closestMode.RefreshRate.Denominator;
+        }
+
         Com<IDXGIOutput6> dxgiOutput6;
         if (SUCCEEDED(dxgiOutput->QueryInterface(IID_PPV_ARGS(&dxgiOutput6)))) {
             DXGI_OUTPUT_DESC1 desc1{};
             dxgiOutput6->GetDesc1(&desc1);
             constexpr auto m = 50000.0f;
             m_colorData.HasST2084Support = desc1.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
-            m_colorData.ColorDepth = desc1.BitsPerColor;
+            m_colorData.BitsPerColor = desc1.BitsPerColor;
             m_colorData.RedPrimaryX = static_cast<uint16_t>(desc1.RedPrimary[0] * m);
             m_colorData.RedPrimaryY = static_cast<uint16_t>(desc1.RedPrimary[1] * m);
             m_colorData.GreenPrimaryX = static_cast<uint16_t>(desc1.GreenPrimary[0] * m);
@@ -62,5 +77,9 @@ namespace dxvk {
 
     const NvapiOutput::ColorData& NvapiOutput::GetColorData() const {
         return m_colorData;
+    }
+
+    const NvapiOutput::DisplayMode& NvapiOutput::GetDisplayMode() const {
+        return m_displayMode;
     }
 }

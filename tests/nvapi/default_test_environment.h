@@ -13,7 +13,7 @@ class DefaultTestEnvironment {
   public:
     DefaultTestEnvironment();
 
-    [[nodiscard]] std::array<std::unique_ptr<expectation>, 22> ConfigureExpectations();
+    [[nodiscard]] std::array<std::unique_ptr<expectation>, 23> ConfigureExpectations();
     [[nodiscard]] DXGIDxvkFactoryMock* DXGIFactory() const { return mockFactory->GetDXGIFactoryMock(); }
     [[nodiscard]] D3D12Vkd3dDeviceMock* D3D12Device() const { return mockFactory->GetD3D12DeviceMock(); }
     [[nodiscard]] VkMock* Vk() const { return mockFactory->GetVkMock(); }

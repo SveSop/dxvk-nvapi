@@ -12,10 +12,18 @@ namespace dxvk {
         explicit NvapiOutput(NvapiAdapter* parent, uint32_t adapterIndex, uint32_t outputIndex);
         ~NvapiOutput();
 
+        struct DisplayMode {
+            uint32_t Width;
+            uint32_t Height;
+            uint32_t RefreshRate;
+            int32_t Left;
+            int32_t Top;
+        };
+
         struct ColorData {
             bool HasST2084Support;
 
-            uint16_t ColorDepth;
+            uint16_t BitsPerColor;
 
             uint16_t RedPrimaryX;
             uint16_t RedPrimaryY;
@@ -42,6 +50,7 @@ namespace dxvk {
         [[nodiscard]] std::string GetDeviceName() const;
         [[nodiscard]] bool IsPrimary() const;
         [[nodiscard]] const ColorData& GetColorData() const;
+        [[nodiscard]] const DisplayMode& GetDisplayMode() const;
 
       private:
         NvapiAdapter* m_parent;
@@ -49,5 +58,6 @@ namespace dxvk {
         std::string m_deviceName;
         bool m_isPrimary{};
         ColorData m_colorData{};
+        DisplayMode m_displayMode{};
     };
 }

@@ -14,7 +14,7 @@ ExtendedTestEnvironment::ExtendedTestEnvironment() {
     output3 = mockFactory->CreateDXGIOutput6Mock();
 }
 
-[[nodiscard]] std::array<std::unique_ptr<expectation>, 39> ExtendedTestEnvironment::ConfigureExpectations() {
+[[nodiscard]] std::array<std::unique_ptr<expectation>, 42> ExtendedTestEnvironment::ConfigureExpectations() {
     auto dxgiFactory = mockFactory->GetDXGIFactoryMock();
     auto vk = mockFactory->GetVkMock();
     auto nvml = mockFactory->GetNvmlMock();
@@ -85,13 +85,19 @@ ExtendedTestEnvironment::ExtendedTestEnvironment() {
         NAMED_ALLOW_CALL(*output1, GetDesc(_))
             .SIDE_EFFECT(*_1 = DXGI_OUTPUT_DESC{L"Output1", {0, 0, 0, 0}, 1, DXGI_MODE_ROTATION_UNSPECIFIED, nullptr})
             .RETURN(S_OK),
+        NAMED_ALLOW_CALL(*output1, FindClosestMatchingMode(_, _, _))
+            .SIDE_EFFECT(*_2 = DXGI_MODE_DESC{3440, 1440, {120000, 1000}, DXGI_FORMAT_UNKNOWN, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_MODE_SCALING_UNSPECIFIED})
+            .RETURN(S_OK),
         NAMED_ALLOW_CALL(*output1, QueryInterface(__uuidof(IDXGIOutput6), _))
             .RETURN(E_FAIL),
 
         NAMED_ALLOW_CALL(*output2, Release())
             .RETURN(0),
         NAMED_ALLOW_CALL(*output2, GetDesc(_))
-            .SIDE_EFFECT(*_1 = DXGI_OUTPUT_DESC{L"Output2", {0, 0, 0, 0}, 1, DXGI_MODE_ROTATION_UNSPECIFIED, nullptr})
+            .SIDE_EFFECT(*_1 = DXGI_OUTPUT_DESC{L"Output2", {3440, 120, 0, 0}, 1, DXGI_MODE_ROTATION_UNSPECIFIED, nullptr})
+            .RETURN(S_OK),
+        NAMED_ALLOW_CALL(*output2, FindClosestMatchingMode(_, _, _))
+            .SIDE_EFFECT(*_2 = DXGI_MODE_DESC{1920, 1080, {60000, 1000}, DXGI_FORMAT_UNKNOWN, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_MODE_SCALING_UNSPECIFIED})
             .RETURN(S_OK),
         NAMED_ALLOW_CALL(*output2, QueryInterface(__uuidof(IDXGIOutput6), _))
             .RETURN(E_FAIL),
@@ -99,7 +105,10 @@ ExtendedTestEnvironment::ExtendedTestEnvironment() {
         NAMED_ALLOW_CALL(*output3, Release())
             .RETURN(0),
         NAMED_ALLOW_CALL(*output3, GetDesc(_))
-            .SIDE_EFFECT(*_1 = DXGI_OUTPUT_DESC{L"Output3", {0, 0, 0, 0}, 1, DXGI_MODE_ROTATION_UNSPECIFIED, nullptr})
+            .SIDE_EFFECT(*_1 = DXGI_OUTPUT_DESC{L"Output3", {5360, 120, 0, 0}, 1, DXGI_MODE_ROTATION_UNSPECIFIED, nullptr})
+            .RETURN(S_OK),
+        NAMED_ALLOW_CALL(*output3, FindClosestMatchingMode(_, _, _))
+            .SIDE_EFFECT(*_2 = DXGI_MODE_DESC{1920, 1080, {50000, 1000}, DXGI_FORMAT_UNKNOWN, DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED, DXGI_MODE_SCALING_UNSPECIFIED})
             .RETURN(S_OK),
         NAMED_ALLOW_CALL(*output3, QueryInterface(__uuidof(IDXGIOutput6), _))
             .RETURN(E_FAIL),

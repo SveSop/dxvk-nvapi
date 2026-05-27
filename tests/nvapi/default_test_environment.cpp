@@ -11,7 +11,7 @@ DefaultTestEnvironment::DefaultTestEnvironment() {
     output = mockFactory->CreateDXGIOutput6Mock();
 }
 
-[[nodiscard]] std::array<std::unique_ptr<expectation>, 22> DefaultTestEnvironment::ConfigureExpectations() {
+[[nodiscard]] std::array<std::unique_ptr<expectation>, 23> DefaultTestEnvironment::ConfigureExpectations() {
     auto dxgiFactory = mockFactory->GetDXGIFactoryMock();
     auto vk = mockFactory->GetVkMock();
     auto nvml = mockFactory->GetNvmlMock();
@@ -53,6 +53,8 @@ DefaultTestEnvironment::DefaultTestEnvironment() {
             .RETURN(0),
         NAMED_ALLOW_CALL(*output, GetDesc(_))
             .SIDE_EFFECT(*_1 = DXGI_OUTPUT_DESC{L"Output1", {0, 0, 0, 0}, 1, DXGI_MODE_ROTATION_UNSPECIFIED, nullptr})
+            .RETURN(S_OK),
+        NAMED_ALLOW_CALL(*output, FindClosestMatchingMode(_, _, _))
             .RETURN(S_OK),
         NAMED_ALLOW_CALL(*output, QueryInterface(__uuidof(IDXGIOutput6), _))
             .RETURN(E_FAIL),

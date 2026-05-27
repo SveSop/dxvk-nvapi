@@ -13,7 +13,7 @@ class ExtendedTestEnvironment {
   public:
     ExtendedTestEnvironment();
 
-    [[nodiscard]] std::array<std::unique_ptr<expectation>, 39> ConfigureExpectations();
+    [[nodiscard]] std::array<std::unique_ptr<expectation>, 42> ConfigureExpectations();
     [[nodiscard]] DXGIDxvkFactoryMock* DXGIFactory() const { return mockFactory->GetDXGIFactoryMock(); }
     [[nodiscard]] VkMock* Vk() const { return mockFactory->GetVkMock(); }
     [[nodiscard]] NvmlMock* Nvml() const { return mockFactory->GetNvmlMock(); }
