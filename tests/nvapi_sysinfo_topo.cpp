@@ -337,6 +337,161 @@ TEST_CASE("Topology methods succeed", "[.sysinfo-topo]") {
         }
     }
 
+    SECTION("GetDisplayConfig succeeds") {
+        SECTION("GetDisplayConfig (V1) returns OK") {
+            NvU32 pathInfoCount{};
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, nullptr) == NVAPI_OK);
+            REQUIRE(pathInfoCount == 3);
+
+            auto pathInfo = std::vector<NV_DISPLAYCONFIG_PATH_INFO_V1>(pathInfoCount);
+            for (auto& info : pathInfo) {
+                info.version = NV_DISPLAYCONFIG_PATH_INFO_VER1;
+                info.sourceModeInfo = new NV_DISPLAYCONFIG_SOURCE_MODE_INFO_V1;
+            }
+
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, reinterpret_cast<NV_DISPLAYCONFIG_PATH_INFO*>(pathInfo.data())) == NVAPI_OK);
+            REQUIRE(pathInfo[0].sourceModeInfo->resolution.width == 3440);
+            REQUIRE(pathInfo[0].sourceModeInfo->resolution.height == 1440);
+            REQUIRE(pathInfo[0].sourceModeInfo->position.x == 0);
+            REQUIRE(pathInfo[0].sourceModeInfo->position.y == 0);
+            REQUIRE(pathInfo[1].sourceModeInfo->resolution.width == 1920);
+            REQUIRE(pathInfo[1].sourceModeInfo->resolution.height == 1080);
+            REQUIRE(pathInfo[1].sourceModeInfo->position.x == 3440);
+            REQUIRE(pathInfo[1].sourceModeInfo->position.y == 120);
+            REQUIRE(pathInfo[2].sourceModeInfo->resolution.width == 1920);
+            REQUIRE(pathInfo[2].sourceModeInfo->resolution.height == 1080);
+            REQUIRE(pathInfo[2].sourceModeInfo->position.x == 5360);
+            REQUIRE(pathInfo[2].sourceModeInfo->position.y == 120);
+            for (auto& info : pathInfo) {
+                REQUIRE(info.reserved_sourceId == 0);
+                REQUIRE(info.sourceModeInfo->resolution.colorDepth == 30);
+                REQUIRE(info.sourceModeInfo->colorFormat == NV_FORMAT_UNKNOWN);
+                REQUIRE(info.sourceModeInfo->spanningOrientation == NV_DISPLAYCONFIG_SPAN_NONE);
+                REQUIRE(info.sourceModeInfo->bGDIPrimary == false);
+                REQUIRE(info.targetInfoCount == 1);
+            }
+
+            for (auto& info : pathInfo) {
+                info.targetInfo = new NV_DISPLAYCONFIG_PATH_TARGET_INFO_V1[info.targetInfoCount];
+                for (auto j = 0U; j < info.targetInfoCount; j++) {
+                    info.targetInfo[j].details = new NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_V1;
+                    info.targetInfo[j].details->version = NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_VER;
+                }
+            }
+
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, reinterpret_cast<NV_DISPLAYCONFIG_PATH_INFO*>(pathInfo.data())) == NVAPI_OK);
+            REQUIRE(pathInfo[0].targetInfo[0].details->refreshRate1K == 120000);
+            REQUIRE(pathInfo[0].targetInfo[0].displayId == 0x00010001);
+            REQUIRE(pathInfo[1].targetInfo[0].displayId == 0x00010002);
+            REQUIRE(pathInfo[1].targetInfo[0].details->refreshRate1K == 60000);
+            REQUIRE(pathInfo[2].targetInfo[0].displayId == 0x00020001);
+            REQUIRE(pathInfo[2].targetInfo[0].details->refreshRate1K == 50000);
+            for (auto& info : pathInfo) {
+                REQUIRE(info.reserved_sourceId == 0);
+                REQUIRE(info.targetInfo[0].details->rotation == NV_ROTATE_0);
+                REQUIRE(info.targetInfo[0].details->scaling == NV_SCALING_DEFAULT);
+                REQUIRE(info.targetInfo[0].details->connector == NVAPI_GPU_CONNECTOR_UNKNOWN);
+            }
+
+            for (auto& info : pathInfo) {
+                for (auto i = 0U; i < info.targetInfoCount; i++)
+                    delete info.targetInfo[i].details;
+
+                delete info.sourceModeInfo;
+                delete[] info.targetInfo;
+            }
+        }
+
+        SECTION("GetDisplayConfig (V2) returns OK") {
+            NvU32 pathInfoCount{};
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, nullptr) == NVAPI_OK);
+            REQUIRE(pathInfoCount == 3);
+
+            auto pathInfo = std::vector<NV_DISPLAYCONFIG_PATH_INFO_V2>(pathInfoCount);
+            for (auto& info : pathInfo) {
+                info.version = NV_DISPLAYCONFIG_PATH_INFO_VER2;
+                info.sourceModeInfo = new NV_DISPLAYCONFIG_SOURCE_MODE_INFO_V1;
+            }
+
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_OK);
+            REQUIRE(pathInfo[0].sourceModeInfo->resolution.width == 3440);
+            REQUIRE(pathInfo[0].sourceModeInfo->resolution.height == 1440);
+            REQUIRE(pathInfo[0].sourceModeInfo->position.x == 0);
+            REQUIRE(pathInfo[0].sourceModeInfo->position.y == 0);
+            REQUIRE(pathInfo[1].sourceModeInfo->resolution.width == 1920);
+            REQUIRE(pathInfo[1].sourceModeInfo->resolution.height == 1080);
+            REQUIRE(pathInfo[1].sourceModeInfo->position.x == 3440);
+            REQUIRE(pathInfo[1].sourceModeInfo->position.y == 120);
+            REQUIRE(pathInfo[2].sourceModeInfo->resolution.width == 1920);
+            REQUIRE(pathInfo[2].sourceModeInfo->resolution.height == 1080);
+            REQUIRE(pathInfo[2].sourceModeInfo->position.x == 5360);
+            REQUIRE(pathInfo[2].sourceModeInfo->position.y == 120);
+            for (auto& info : pathInfo) {
+                REQUIRE(info.sourceId == 0);
+                REQUIRE(info.IsNonNVIDIAAdapter == false);
+                REQUIRE(info.sourceModeInfo->resolution.colorDepth == 30);
+                REQUIRE(info.sourceModeInfo->colorFormat == NV_FORMAT_UNKNOWN);
+                REQUIRE(info.sourceModeInfo->spanningOrientation == NV_DISPLAYCONFIG_SPAN_NONE);
+                REQUIRE(info.sourceModeInfo->bGDIPrimary == false);
+                REQUIRE(info.targetInfoCount == 1);
+            }
+
+            for (auto& info : pathInfo) {
+                info.targetInfo = new NV_DISPLAYCONFIG_PATH_TARGET_INFO_V2[info.targetInfoCount];
+                for (auto j = 0U; j < info.targetInfoCount; j++) {
+                    info.targetInfo[j].details = new NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_V1;
+                    info.targetInfo[j].details->version = NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_VER;
+                }
+            }
+
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_OK);
+            REQUIRE(pathInfo[0].targetInfo[0].details->refreshRate1K == 120000);
+            REQUIRE(pathInfo[0].targetInfo[0].displayId == 0x00010001);
+            REQUIRE(pathInfo[1].targetInfo[0].displayId == 0x00010002);
+            REQUIRE(pathInfo[1].targetInfo[0].details->refreshRate1K == 60000);
+            REQUIRE(pathInfo[2].targetInfo[0].displayId == 0x00020001);
+            REQUIRE(pathInfo[2].targetInfo[0].details->refreshRate1K == 50000);
+            for (auto& info : pathInfo) {
+                REQUIRE(info.targetInfo[0].targetId == 0);
+                REQUIRE(info.targetInfo[0].details->rotation == NV_ROTATE_0);
+                REQUIRE(info.targetInfo[0].details->scaling == NV_SCALING_DEFAULT);
+                REQUIRE(info.targetInfo[0].details->connector == NVAPI_GPU_CONNECTOR_UNKNOWN);
+            }
+
+            for (auto& info : pathInfo) {
+                for (auto i = 0U; i < info.targetInfoCount; i++)
+                    delete info.targetInfo[i].details;
+
+                delete info.sourceModeInfo;
+                delete[] info.targetInfo;
+            }
+        }
+
+        SECTION("GetDisplayConfig with unknown struct version returns incompatible-struct-version") {
+            NvU32 pathInfoCount{};
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, nullptr) == NVAPI_OK);
+            REQUIRE(pathInfoCount == 3);
+
+            auto pathInfo = std::vector<NV_DISPLAYCONFIG_PATH_INFO_V2>(pathInfoCount);
+            for (auto& info : pathInfo)
+                info.version = NV_DISPLAYCONFIG_PATH_INFO_VER2 + 1;
+
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_INCOMPATIBLE_STRUCT_VERSION);
+        }
+
+        SECTION("GetDisplayConfig with current struct version returns not incompatible-struct-version") {
+            NvU32 pathInfoCount{};
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, nullptr) == NVAPI_OK);
+            REQUIRE(pathInfoCount == 3);
+
+            auto pathInfo = std::vector<NV_DISPLAYCONFIG_PATH_INFO_V2>(pathInfoCount);
+            for (auto& info : pathInfo)
+                info.version = NV_DISPLAYCONFIG_PATH_INFO_VER;
+
+            REQUIRE(NvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) != NVAPI_INCOMPATIBLE_STRUCT_VERSION);
+        }
+    }
+
     SECTION("GetPhysicalGPUs succeeds") {
         SECTION("GetPhysicalGPUs (V1) returns OK") {
             NvPhysicalGpuHandle handles[NVAPI_MAX_PHYSICAL_BRIDGES]{};

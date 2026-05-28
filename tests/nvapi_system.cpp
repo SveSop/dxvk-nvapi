@@ -134,6 +134,7 @@ TEST_CASE("Sysinfo methods succeed against local system", "[system]") {
     GETNVAPIPROCADDR(GetAssociatedNvidiaDisplayName);
     GETNVAPIPROCADDR(DISP_GetDisplayIdByDisplayName);
     GETNVAPIPROCADDR(Disp_GetHdrCapabilities);
+    GETNVAPIPROCADDR(DISP_GetDisplayConfig);
 
 #undef GETNVAPIPROCADDR
 
@@ -169,6 +170,7 @@ TEST_CASE("Sysinfo methods succeed against local system", "[system]") {
     CHECK(nvAPI_GetAssociatedNvidiaDisplayName);
     CHECK(nvAPI_DISP_GetDisplayIdByDisplayName);
     CHECK(nvAPI_Disp_GetHdrCapabilities);
+    CHECK(nvAPI_DISP_GetDisplayConfig);
 
     NvAPI_Status result{};
     REQUIRE(nvAPI_Initialize() == NVAPI_OK);
@@ -456,6 +458,49 @@ TEST_CASE("Sysinfo methods succeed against local system", "[system]") {
     if (nvAPI_DISP_GetGDIPrimaryDisplayId)
         CHECK_THAT(nvAPI_DISP_GetGDIPrimaryDisplayId(&primaryDisplayId), Predicate<NvAPI_Status>([](auto s) -> bool { return s == NVAPI_OK || s == NVAPI_NVIDIA_DEVICE_NOT_FOUND; }));
 
+    std::map<NvU32, std::string> displayModesByDisplayID;
+
+    NvU32 pathInfoCount{};
+    CHECK(nvAPI_DISP_GetDisplayConfig(&pathInfoCount, nullptr) == NVAPI_OK);
+
+    if (pathInfoCount > 0) {
+        auto pathInfo = std::vector<NV_DISPLAYCONFIG_PATH_INFO>(pathInfoCount);
+        for (auto& info : pathInfo)
+            info.version = NV_DISPLAYCONFIG_PATH_INFO_VER;
+
+        CHECK(nvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_OK);
+        REQUIRE(pathInfo.size() == pathInfoCount);
+
+        for (auto& info : pathInfo) {
+            info.sourceModeInfo = new NV_DISPLAYCONFIG_SOURCE_MODE_INFO;
+            info.targetInfo = new NV_DISPLAYCONFIG_PATH_TARGET_INFO[info.targetInfoCount];
+            for (auto j = 0U; j < info.targetInfoCount; j++) {
+                info.targetInfo[j].details = new NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO;
+                info.targetInfo[j].details->version = NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_VER;
+            }
+        }
+
+        CHECK(nvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_OK);
+
+        for (auto& info : pathInfo) {
+            for (auto i = 0U; i < info.targetInfoCount; i++) {
+                auto mode = std::to_string(info.sourceModeInfo->resolution.width)
+                    + "x" + std::to_string(info.sourceModeInfo->resolution.height)
+                    + "@" + std::to_string(info.targetInfo[i].details->refreshRate1K / 1000)
+                    + " " + std::to_string(info.sourceModeInfo->position.x) + "," + std::to_string(info.sourceModeInfo->position.y);
+                displayModesByDisplayID.emplace(info.targetInfo[i].displayId, mode);
+            }
+        }
+
+        for (auto& info : pathInfo) {
+            for (auto i = 0U; i < info.targetInfoCount; i++)
+                delete info.targetInfo[i].details;
+
+            delete info.sourceModeInfo;
+            delete[] info.targetInfo;
+        }
+    }
+
     if (nvAPI_EnumNvidiaDisplayHandle) {
         NvDisplayHandle handle{};
         NvU32 i = 0;
@@ -477,6 +522,12 @@ TEST_CASE("Sysinfo methods succeed against local system", "[system]") {
 
                 std::cout << "    Display ID:                 0x" << std::setfill('0') << std::setw(8)
                           << std::hex << displayId
+                          << std::endl;
+            }
+
+            if (displayModesByDisplayID.contains(displayId)) {
+                std::cout << "    Display mode:               "
+                          << displayModesByDisplayID[displayId]
                           << std::endl;
             }
 
