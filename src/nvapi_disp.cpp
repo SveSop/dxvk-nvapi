@@ -416,3 +416,12 @@ NVAPI_FUNCTION NvAPI_DISP_GetDisplayConfig(NvU32* pathInfoCount, NV_DISPLAYCONFI
 
     return Ok(n);
 }
+
+NVAPI_FUNCTION NvAPI_DISP_SetDisplayConfig(NvU32 pathInfoCount, NV_DISPLAYCONFIG_PATH_INFO* pathInfo, NvU32 flags) {
+    constexpr auto n = __func__;
+
+    if (log::tracing())
+        log::trace(n, pathInfoCount, log::fmt::ptr(pathInfo), log::fmt::flags(flags));
+
+    return NoImplementation(n);
+}

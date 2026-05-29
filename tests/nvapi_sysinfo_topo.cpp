@@ -492,6 +492,10 @@ TEST_CASE("Topology methods succeed", "[.sysinfo-topo]") {
         }
     }
 
+    SECTION("SetDisplayConfig returns no-implementation") {
+        REQUIRE(NvAPI_DISP_SetDisplayConfig(0, nullptr, 0) == NVAPI_NO_IMPLEMENTATION);
+    }
+
     SECTION("GetPhysicalGPUs succeeds") {
         SECTION("GetPhysicalGPUs (V1) returns OK") {
             NvPhysicalGpuHandle handles[NVAPI_MAX_PHYSICAL_BRIDGES]{};
