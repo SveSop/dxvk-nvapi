@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "nvapi_tests_private.h"
 #include "nvapi_interface.h"
+#include "nvapi/display_config.h"
 
 using namespace Catch::Matchers;
 
@@ -460,29 +461,20 @@ TEST_CASE("Sysinfo methods succeed against local system", "[system]") {
 
     std::map<NvU32, std::string> displayModesByDisplayID;
 
-    NvU32 pathInfoCount{};
-    CHECK(nvAPI_DISP_GetDisplayConfig(&pathInfoCount, nullptr) == NVAPI_OK);
+    DisplayConfig<NV_DISPLAYCONFIG_PATH_INFO, NV_DISPLAYCONFIG_PATH_TARGET_INFO, NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO> displayConfig{};
+    CHECK(nvAPI_DISP_GetDisplayConfig(&displayConfig.pathInfoCount, nullptr) == NVAPI_OK);
 
-    if (pathInfoCount > 0) {
-        auto pathInfo = std::vector<NV_DISPLAYCONFIG_PATH_INFO>(pathInfoCount);
-        for (auto& info : pathInfo)
-            info.version = NV_DISPLAYCONFIG_PATH_INFO_VER;
+    if (displayConfig.pathInfoCount > 0) {
+        displayConfig.InitializePathInfo(NV_DISPLAYCONFIG_PATH_INFO_VER);
 
-        CHECK(nvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_OK);
-        REQUIRE(pathInfo.size() == pathInfoCount);
+        CHECK(nvAPI_DISP_GetDisplayConfig(&displayConfig.pathInfoCount, displayConfig.pathInfo.data()) == NVAPI_OK);
+        REQUIRE(displayConfig.pathInfo.size() == displayConfig.pathInfoCount);
 
-        for (auto& info : pathInfo) {
-            info.sourceModeInfo = new NV_DISPLAYCONFIG_SOURCE_MODE_INFO;
-            info.targetInfo = new NV_DISPLAYCONFIG_PATH_TARGET_INFO[info.targetInfoCount];
-            for (auto j = 0U; j < info.targetInfoCount; j++) {
-                info.targetInfo[j].details = new NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO;
-                info.targetInfo[j].details->version = NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_VER;
-            }
-        }
+        displayConfig.InitializeTargetInfo(NV_DISPLAYCONFIG_PATH_ADVANCED_TARGET_INFO_VER);
 
-        CHECK(nvAPI_DISP_GetDisplayConfig(&pathInfoCount, pathInfo.data()) == NVAPI_OK);
+        CHECK(nvAPI_DISP_GetDisplayConfig(&displayConfig.pathInfoCount, displayConfig.pathInfo.data()) == NVAPI_OK);
 
-        for (auto& info : pathInfo) {
+        for (auto& info : displayConfig.pathInfo) {
             for (auto i = 0U; i < info.targetInfoCount; i++) {
                 auto mode = std::to_string(info.sourceModeInfo->resolution.width)
                     + "x" + std::to_string(info.sourceModeInfo->resolution.height)
@@ -490,14 +482,6 @@ TEST_CASE("Sysinfo methods succeed against local system", "[system]") {
                     + " " + std::to_string(info.sourceModeInfo->position.x) + "," + std::to_string(info.sourceModeInfo->position.y);
                 displayModesByDisplayID.emplace(info.targetInfo[i].displayId, mode);
             }
-        }
-
-        for (auto& info : pathInfo) {
-            for (auto i = 0U; i < info.targetInfoCount; i++)
-                delete info.targetInfo[i].details;
-
-            delete info.sourceModeInfo;
-            delete[] info.targetInfo;
         }
     }
 
