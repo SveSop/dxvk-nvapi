@@ -136,11 +136,6 @@ namespace dxvk::env {
             return true;
         }
 
-        if (architectureId >= NV_GPU_ARCHITECTURE_TU100 && getExecutableName() == std::string("aces.exe")) {
-            log::info("Spoofing Pascal for Turing and later due to detecting aces.exe (War Thunder)");
-            return true;
-        }
-
         return false;
     }
 
