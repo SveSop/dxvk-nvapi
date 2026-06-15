@@ -53,8 +53,9 @@ jobs:
     - name: Test MSVC x64
       shell: pwsh
       run: |
-        & .\build-msvc-x64\tests\nvapi64-tests.exe [@unit-tests]
-        & .\build-msvc-x64\tests\nvofapi64-tests.exe [@unit-tests]
+        $PSNativeCommandUseErrorActionPreference = $true
+        .\build-msvc-x64\tests\nvapi64-tests.exe [@unit-tests]
+        .\build-msvc-x64\tests\nvofapi64-tests.exe [@unit-tests]
 
     - name: Build MSVC layer
       shell: pwsh
