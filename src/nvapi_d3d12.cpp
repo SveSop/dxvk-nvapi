@@ -866,14 +866,13 @@ NVAPI_FUNCTION NvAPI_D3D12_SetCreatePipelineStateOptions(ID3D12Device5* pDevice,
     if (!device->IsOpacityMicromapSupported())
         return NotSupported(n);
 
-    D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAG flags = D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAGS_NONE;
-    static const NVAPI_D3D12_PIPELINE_CREATION_STATE_FLAGS supprotedNvapiFlags =
-        NVAPI_D3D12_PIPELINE_CREATION_STATE_FLAGS_ENABLE_OMM_SUPPORT;
-    if (pState->flags & ~supprotedNvapiFlags)
+    auto flags = D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAGS_NONE;
+    static constexpr auto supportedNvapiFlags = NVAPI_D3D12_PIPELINE_CREATION_STATE_FLAGS_ENABLE_OMM_SUPPORT;
+    if (pState->flags & ~supportedNvapiFlags)
         return NotSupported(n);
 
     if (pState->flags & NVAPI_D3D12_PIPELINE_CREATION_STATE_FLAGS_ENABLE_OMM_SUPPORT)
-        flags = (D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAG)(flags | D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAGS_ENABLE_OMM_SUPPORT);
+        flags = static_cast<D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAG>(flags | D3D12_VK_EXT_PIPELINE_CREATION_STATE_FLAGS_ENABLE_OMM_SUPPORT);
 
     if (!device->SetCreatePipelineStateFlagsNVAPI(flags))
         return NotSupported(n);
