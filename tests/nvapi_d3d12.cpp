@@ -30,6 +30,10 @@ TEST_CASE("D3D12 methods succeed", "[.d3d12]") {
     auto commandQueueRefCount = 0;
     auto lowLatencyDeviceRefCount = 0;
 
+    ALLOW_CALL(device, QueryInterface(__uuidof(IUnknown), _))
+        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12Device*>(&device)))
+        .LR_SIDE_EFFECT(deviceRefCount++)
+        .RETURN(S_OK);
     ALLOW_CALL(device, QueryInterface(__uuidof(ID3D12Device), _))
         .LR_SIDE_EFFECT(*_2 = static_cast<ID3D12Device*>(&device))
         .LR_SIDE_EFFECT(deviceRefCount++)
@@ -61,11 +65,6 @@ TEST_CASE("D3D12 methods succeed", "[.d3d12]") {
         .LR_SIDE_EFFECT(deviceRefCount--)
         .RETURN(deviceRefCount);
 
-    ALLOW_CALL(device, QueryInterface(__uuidof(IUnknown), _))
-        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12Device*>(&device)))
-        .LR_SIDE_EFFECT(deviceRefCount++)
-        .RETURN(S_OK);
-
     ALLOW_CALL(device, QueryInterface(__uuidof(ID3DLowLatencyDevice), _))
         .RETURN(E_NOINTERFACE);
 
@@ -76,6 +75,10 @@ TEST_CASE("D3D12 methods succeed", "[.d3d12]") {
     ALLOW_CALL(device, SupportsCubin64bit())
         .RETURN(true);
 
+    ALLOW_CALL(commandList, QueryInterface(__uuidof(IUnknown), _))
+        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12GraphicsCommandList1*>(&commandList)))
+        .LR_SIDE_EFFECT(commandListRefCount++)
+        .RETURN(S_OK);
     ALLOW_CALL(commandList, QueryInterface(__uuidof(ID3D12GraphicsCommandList), _))
         .LR_SIDE_EFFECT(*_2 = static_cast<ID3D12GraphicsCommandList*>(&commandList))
         .LR_SIDE_EFFECT(commandListRefCount++)
@@ -94,10 +97,6 @@ TEST_CASE("D3D12 methods succeed", "[.d3d12]") {
         .RETURN(S_OK);
     ALLOW_CALL(commandList, QueryInterface(__uuidof(ID3D12GraphicsCommandListExt2), _))
         .LR_SIDE_EFFECT(*_2 = static_cast<ID3D12GraphicsCommandListExt2*>(&commandList))
-        .LR_SIDE_EFFECT(commandListRefCount++)
-        .RETURN(S_OK);
-    ALLOW_CALL(commandList, QueryInterface(__uuidof(IUnknown), _))
-        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12GraphicsCommandList1*>(&commandList)))
         .LR_SIDE_EFFECT(commandListRefCount++)
         .RETURN(S_OK);
     ALLOW_CALL(commandList, AddRef())
@@ -1088,6 +1087,10 @@ TEST_CASE("D3D12 raytracing methods succeed", "[.d3d12]") {
     auto commandListRefCount = 0;
     auto commandQueueRefCount = 0;
 
+    ALLOW_CALL(device, QueryInterface(__uuidof(IUnknown), _))
+        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12Device*>(&device)))
+        .LR_SIDE_EFFECT(deviceRefCount++)
+        .RETURN(S_OK);
     ALLOW_CALL(device, QueryInterface(__uuidof(ID3D12Device), _))
         .LR_SIDE_EFFECT(*_2 = static_cast<ID3D12Device*>(&device))
         .LR_SIDE_EFFECT(deviceRefCount++)
@@ -1115,11 +1118,6 @@ TEST_CASE("D3D12 raytracing methods succeed", "[.d3d12]") {
         .LR_SIDE_EFFECT(deviceRefCount--)
         .RETURN(deviceRefCount);
 
-    ALLOW_CALL(device, QueryInterface(__uuidof(IUnknown), _))
-        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12Device*>(&device)))
-        .LR_SIDE_EFFECT(deviceRefCount++)
-        .RETURN(S_OK);
-
     ALLOW_CALL(device, QueryInterface(__uuidof(ID3DLowLatencyDevice), _))
         .RETURN(E_NOINTERFACE);
 
@@ -1130,6 +1128,10 @@ TEST_CASE("D3D12 raytracing methods succeed", "[.d3d12]") {
     ALLOW_CALL(device, SupportsCubin64bit())
         .RETURN(true);
 
+    ALLOW_CALL(commandList, QueryInterface(__uuidof(IUnknown), _))
+        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12GraphicsCommandList1*>(&commandList)))
+        .LR_SIDE_EFFECT(commandListRefCount++)
+        .RETURN(S_OK);
     ALLOW_CALL(commandList, QueryInterface(__uuidof(ID3D12GraphicsCommandList), _))
         .LR_SIDE_EFFECT(*_2 = static_cast<ID3D12GraphicsCommandList*>(&commandList))
         .LR_SIDE_EFFECT(commandListRefCount++)
@@ -1148,10 +1150,6 @@ TEST_CASE("D3D12 raytracing methods succeed", "[.d3d12]") {
         .RETURN(S_OK);
     ALLOW_CALL(commandList, QueryInterface(__uuidof(ID3D12GraphicsCommandListExt2), _))
         .LR_SIDE_EFFECT(*_2 = static_cast<ID3D12GraphicsCommandListExt2*>(&commandList))
-        .LR_SIDE_EFFECT(commandListRefCount++)
-        .RETURN(S_OK);
-    ALLOW_CALL(commandList, QueryInterface(__uuidof(IUnknown), _))
-        .LR_SIDE_EFFECT(*_2 = static_cast<IUnknown*>(static_cast<ID3D12GraphicsCommandList1*>(&commandList)))
         .LR_SIDE_EFFECT(commandListRefCount++)
         .RETURN(S_OK);
     ALLOW_CALL(commandList, AddRef())
