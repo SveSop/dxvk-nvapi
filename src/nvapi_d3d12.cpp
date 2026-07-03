@@ -635,12 +635,12 @@ NVAPI_FUNCTION NvAPI_D3D12_SetDepthBoundsTestValues(ID3D12GraphicsCommandList* p
     return Ok(n, alreadyLoggedOk);
 }
 
-inline static std::optional<NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS> GetThreadReorderingCaps(ID3D12Device* pDevice, dxvk::NvapiD3d12Device* device) {
+inline static bool IsThreadReorderingSupported(ID3D12Device* pDevice, NvapiD3d12Device* device) {
     if (!env::isD3d12NvShaderExtnEnabled())
-        return {};
+        return false;
 
     if (!device || !device->IsNvShaderExtnOpCodeSupported(NV_EXTN_OP_HIT_OBJECT_REORDER_THREAD))
-        return {};
+        return false;
 
 #if defined(_MSC_VER)
     LUID luid = pDevice->GetAdapterLuid();
@@ -651,16 +651,9 @@ inline static std::optional<NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS> GetTh
 
     auto adapter = nvapiAdapterRegistry->FindAdapter(luid);
     if (!adapter)
-        return {};
+        return false;
 
-    switch (adapter->GetReorderingHint()) {
-        case VK_RAY_TRACING_INVOCATION_REORDER_MODE_NONE_NV:
-            return NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_NONE;
-        case VK_RAY_TRACING_INVOCATION_REORDER_MODE_REORDER_NV:
-            return NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_STANDARD;
-        default:
-            return {};
-    }
+    return adapter->GetReorderingHint() == VK_RAY_TRACING_INVOCATION_REORDER_MODE_REORDER_NV;
 }
 
 NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingCaps(ID3D12Device* pDevice, NVAPI_D3D12_RAYTRACING_CAPS_TYPE type, void* pData, size_t dataSize) {
@@ -676,13 +669,17 @@ NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingCaps(ID3D12Device* pDevice, NVAPI_D3D12_
         return InvalidPointer(n);
 
     auto device = NvapiD3d12Device::GetOrCreate(pDevice);
+    auto supported = false;
 
     switch (type) {
         case NVAPI_D3D12_RAYTRACING_CAPS_TYPE_THREAD_REORDERING: {
             if (dataSize != sizeof(NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS))
                 return InvalidArgument(n);
 
-            *static_cast<NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS*>(pData) = GetThreadReorderingCaps(pDevice, device).value_or(NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_NONE);
+            supported = IsThreadReorderingSupported(pDevice, device);
+            *static_cast<NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAPS*>(pData) = supported
+                ? NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_STANDARD
+                : NVAPI_D3D12_RAYTRACING_THREAD_REORDERING_CAP_NONE;
             break;
         }
 
@@ -690,7 +687,8 @@ NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingCaps(ID3D12Device* pDevice, NVAPI_D3D12_
             if (dataSize != sizeof(NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS))
                 return InvalidArgument(n);
 
-            *static_cast<NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS*>(pData) = NvapiD3d12Device::IsOpacityMicromapSupported(pDevice)
+            supported = NvapiD3d12Device::IsOpacityMicromapSupported(pDevice);
+            *static_cast<NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAPS*>(pData) = supported
                 ? NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAP_STANDARD
                 : NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_CAP_NONE;
             break;
@@ -734,7 +732,7 @@ NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingCaps(ID3D12Device* pDevice, NVAPI_D3D12_
             return InvalidArgument(str::format(n, " (", type, ")"));
     }
 
-    return Ok(str::format(n, " (", type, "/", fromRaytracingCaps(type), ")"));
+    return Ok(str::format(n, " (", type, "/", fromRaytracingCaps(type), ": ", (supported ? "Supported" : "Unsupported"), ")"));
 }
 
 NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingAccelerationStructurePrebuildInfoEx(ID3D12Device5* pDevice, NVAPI_GET_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO_EX_PARAMS* pParams) {
