@@ -40,7 +40,7 @@ namespace dxvk {
                                                                              __uuidof(ID3D12GraphicsCommandListExt1),
                                                                              __uuidof(ID3D12GraphicsCommandListExt2),
                                                                          });
-        m_supportsCubin64bit = commandListTier >= 1;
+        m_supportsCubinSMem = commandListTier >= 1;
 
         Com<ID3D12GraphicsCommandList> d3d12CommandList;
         if (SUCCEEDED(vkd3dCommandList->QueryInterface(IID_PPV_ARGS(&d3d12CommandList)))) {
@@ -58,7 +58,7 @@ namespace dxvk {
 
         auto smem = NvapiD3d12Device::FindCubinSmem(pShader);
 
-        if (m_supportsCubin64bit)
+        if (m_supportsCubinSMem)
             return m_vkd3dGraphicsCommandList->LaunchCubinShaderEx(reinterpret_cast<D3D12_CUBIN_DATA_HANDLE*>(pShader), blockX, blockY, blockZ, smem, params, paramSize, nullptr, 0);
 
         if (smem != 0)

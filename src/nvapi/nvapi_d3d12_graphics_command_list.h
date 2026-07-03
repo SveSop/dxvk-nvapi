@@ -29,7 +29,7 @@ namespace dxvk {
         static std::mutex m_mutex;
 
         ID3D12GraphicsCommandListExt2* m_vkd3dGraphicsCommandList{};
-        bool m_supportsCubin64bit = false;
+        bool m_supportsCubinSMem = false;
         bool m_supportsOpacityMicromap = false;
 
         // Reused across calls so the per-build geometry-desc scratch settles at
