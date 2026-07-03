@@ -1,13 +1,11 @@
 #include "nvapi_as_convert.h"
 #include "../util/util_log.h"
-#include "../util/util_statuscode.h"
 
 namespace dxvk {
 
     NvAPI_Status BuildFlagsToD3d12(D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS& d3d12Flags,
         NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS_EX nvapiFlags,
         bool supportsOmm) {
-        constexpr auto n = __func__;
         /* All currently known flags */
         const auto allFlags = static_cast<NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS_EX>(
             NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_COMPACTION_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_TRACE_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_BUILD_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_MINIMIZE_MEMORY_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_OMM_UPDATE_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_DISABLE_OMMS_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_OMM_OPACITY_STATES_UPDATE_EX | NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_DATA_ACCESS_EX);
@@ -22,7 +20,7 @@ namespace dxvk {
 
         if (nvapiFlags & ~allFlags) {
             log::info(str::format("Unsupported NVAPI build flags: ", nvapiFlags));
-            return InvalidArgument(n);
+            return NVAPI_INVALID_ARGUMENT;
         }
 
         d3d12Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
@@ -62,34 +60,33 @@ namespace dxvk {
         if (nvapiFlags & NVAPI_D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_DATA_ACCESS_EX)
             d3d12Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_DATA_ACCESS_PROVISIONAL;
 
-        return Ok(n);
+        return NVAPI_OK;
     }
 
     NvAPI_Status GeomDescTypeToD3d12(D3D12_RAYTRACING_GEOMETRY_TYPE& d3d12Type,
         NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_EX nvapiType) {
-        constexpr auto n = __func__;
         switch (nvapiType) {
             case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES_EX:
                 d3d12Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-                return Ok(n);
+                return NVAPI_OK;
             case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_PROCEDURAL_PRIMITIVE_AABBS_EX:
                 d3d12Type = D3D12_RAYTRACING_GEOMETRY_TYPE_PROCEDURAL_PRIMITIVE_AABBS;
-                return Ok(n);
+                return NVAPI_OK;
             case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_OMM_TRIANGLES_EX:
                 d3d12Type = D3D12_RAYTRACING_GEOMETRY_TYPE_OMM_TRIANGLES;
-                return Ok(n);
+                return NVAPI_OK;
             case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_DMM_TRIANGLES_EX:
                 log::info("Unsupported NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_DMM_TRIANGLES_EX");
-                return NotSupported(n);
+                return NVAPI_NOT_SUPPORTED;
             case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_SPHERES_EX:
                 log::info("Unsupported NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_SPHERES_EX");
-                return NotSupported(n);
+                return NVAPI_NOT_SUPPORTED;
             case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_LSS_EX:
                 log::info("Unsupported NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_LSS_EX");
-                return NotSupported(n);
+                return NVAPI_NOT_SUPPORTED;
             default:
                 log::info(str::format("Unsupported NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_ ", nvapiType));
-                return InvalidArgument(n);
+                return NVAPI_INVALID_ARGUMENT;
         }
     }
 
@@ -103,13 +100,12 @@ namespace dxvk {
 
     NvAPI_Status OmmArrayBuildFlagsToD3d12(D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAGS& d3d12Flags,
         NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_BUILD_FLAGS nvapiFlags) {
-        constexpr auto n = __func__;
         const auto allFlags = static_cast<NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_BUILD_FLAGS>(
             NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_BUILD_FLAG_PREFER_FAST_TRACE | NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_BUILD_FLAG_PREFER_FAST_BUILD);
 
         if (nvapiFlags & ~allFlags) {
             log::info(str::format("Unsupported NVAPI OMM-Array build flags: ", nvapiFlags));
-            return InvalidArgument(n);
+            return NVAPI_INVALID_ARGUMENT;
         }
 
         d3d12Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
@@ -119,13 +115,12 @@ namespace dxvk {
         if (nvapiFlags & NVAPI_D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_BUILD_FLAG_PREFER_FAST_BUILD)
             d3d12Flags |= D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PREFER_FAST_BUILD;
 
-        return Ok(n);
+        return NVAPI_OK;
     }
 
     NvAPI_Status OmmArrayInputsToD3d12(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& d3d12Inputs,
         D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_DESC& arrayDesc,
         const NVAPI_D3D12_BUILD_RAYTRACING_OPACITY_MICROMAP_ARRAY_INPUTS& nvapiInputs) {
-        constexpr auto n = __func__;
 
         memset(&d3d12Inputs, 0x00, sizeof(d3d12Inputs));
         memset(&arrayDesc, 0x00, sizeof(arrayDesc));
@@ -145,22 +140,18 @@ namespace dxvk {
         d3d12Inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
         d3d12Inputs.pOpacityMicromapArrayDesc = &arrayDesc;
 
-        if (NvAPI_Status status = OmmArrayBuildFlagsToD3d12(d3d12Inputs.Flags, nvapiInputs.flags); status != NVAPI_OK)
-            return status;
-
-        return Ok(n);
+        return OmmArrayBuildFlagsToD3d12(d3d12Inputs.Flags, nvapiInputs.flags);
     }
 
     NvAPI_Status NvapiAsConverter::Convert(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& d3d12Desc,
         const NVAPI_D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS_EX& nvapiDesc,
         bool supportsOmm) {
-        constexpr auto n = __func__;
         memset(&d3d12Desc, 0x00, sizeof(d3d12Desc));
 
         d3d12Desc.Type = nvapiDesc.type;
         d3d12Desc.NumDescs = nvapiDesc.numDescs;
 
-        if (NvAPI_Status status = BuildFlagsToD3d12(d3d12Desc.Flags, nvapiDesc.flags, supportsOmm); status != NVAPI_OK)
+        if (auto status = BuildFlagsToD3d12(d3d12Desc.Flags, nvapiDesc.flags, supportsOmm); status != NVAPI_OK)
             return status;
 
         if (nvapiDesc.type == D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL) {
@@ -181,7 +172,7 @@ namespace dxvk {
                     m_opacityMicromapLinkageDescs[i];
 
                 d3d12GeomDesc.Flags = nvapiGeomDesc.flags;
-                if (NvAPI_Status status = GeomDescTypeToD3d12(d3d12GeomDesc.Type, nvapiGeomDesc.type); status != NVAPI_OK)
+                if (auto status = GeomDescTypeToD3d12(d3d12GeomDesc.Type, nvapiGeomDesc.type); status != NVAPI_OK)
                     return status;
 
                 switch (nvapiGeomDesc.type) {
@@ -189,7 +180,7 @@ namespace dxvk {
                         if (usesStride && nvapiDesc.geometryDescStrideInBytes < offsetof(NVAPI_D3D12_RAYTRACING_GEOMETRY_DESC_EX, triangles) + sizeof(D3D12_RAYTRACING_GEOMETRY_TRIANGLES_DESC)) {
                             log::info(str::format("geometryDescStrideInBytes ", nvapiDesc.geometryDescStrideInBytes,
                                 " too small for TRIANGLES geometry."));
-                            return InvalidArgument(n);
+                            return NVAPI_INVALID_ARGUMENT;
                         }
 
                         d3d12GeomDesc.Triangles = nvapiGeomDesc.triangles;
@@ -199,7 +190,7 @@ namespace dxvk {
                         if (usesStride && nvapiDesc.geometryDescStrideInBytes < offsetof(NVAPI_D3D12_RAYTRACING_GEOMETRY_DESC_EX, aabbs) + sizeof(D3D12_RAYTRACING_GEOMETRY_AABBS_DESC)) {
                             log::info(str::format("geometryDescStrideInBytes ", nvapiDesc.geometryDescStrideInBytes,
                                 " too small for AABBS geometry."));
-                            return InvalidArgument(n);
+                            return NVAPI_INVALID_ARGUMENT;
                         }
 
                         d3d12GeomDesc.AABBs = nvapiGeomDesc.aabbs;
@@ -208,12 +199,12 @@ namespace dxvk {
                     case NVAPI_D3D12_RAYTRACING_GEOMETRY_TYPE_OMM_TRIANGLES_EX:
                         if (!supportsOmm) {
                             log::info("Triangles with OMM attachment passed to acceleration structure build when OMM is not supported");
-                            return NotSupported(n);
+                            return NVAPI_NOT_SUPPORTED;
                         }
                         if (usesStride && nvapiDesc.geometryDescStrideInBytes < offsetof(NVAPI_D3D12_RAYTRACING_GEOMETRY_DESC_EX, ommTriangles) + sizeof(NVAPI_D3D12_RAYTRACING_GEOMETRY_OMM_TRIANGLES_DESC)) {
                             log::info(str::format("geometryDescStrideInBytes ", nvapiDesc.geometryDescStrideInBytes,
                                 " too small for OMM_TRIANGLES geometry."));
-                            return InvalidArgument(n);
+                            return NVAPI_INVALID_ARGUMENT;
                         }
 
                         d3d12GeomDesc.OmmTriangles.pTriangles = &nvapiGeomDesc.ommTriangles.triangles;
@@ -232,12 +223,11 @@ namespace dxvk {
 
                     default:
                         log::info(str::format("Unsupported geometry type ", nvapiGeomDesc.type));
-                        return InvalidArgument(n);
+                        return NVAPI_INVALID_ARGUMENT;
                 }
             }
         }
 
-        return Ok(n);
+        return NVAPI_OK;
     }
-
-} // ~namespace dxvk
+}

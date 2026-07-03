@@ -770,8 +770,16 @@ NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingAccelerationStructurePrebuildInfoEx(ID3D
     /* Cannot cache the NvapiAsConverter per device, as device doesn't have to be thread safe, and NvapiAsConverter
      * is destructive */
     NvapiAsConverter asConverter;
-    if (auto status = asConverter.Convert(inputs, *pParams->pDesc, supportsOmm); status != NVAPI_OK)
-        return status;
+    switch (asConverter.Convert(inputs, *pParams->pDesc, supportsOmm)) {
+        case NVAPI_OK:
+            break;
+        case NVAPI_INVALID_ARGUMENT:
+            return InvalidArgument(n);
+        case NVAPI_NOT_SUPPORTED:
+            return NotSupported(n);
+        default:
+            return Error(n);
+    }
 
     pDevice->GetRaytracingAccelerationStructurePrebuildInfo(&inputs, pParams->pInfo);
 
@@ -805,9 +813,16 @@ NVAPI_FUNCTION NvAPI_D3D12_BuildRaytracingAccelerationStructureEx(ID3D12Graphics
     buildDesc.SourceAccelerationStructureData = pParams->pDesc->sourceAccelerationStructureData;
     buildDesc.ScratchAccelerationStructureData = pParams->pDesc->scratchAccelerationStructureData;
     buildDesc.DestAccelerationStructureData = pParams->pDesc->destAccelerationStructureData;
-    if (auto status = commandList->GetAsConverter().Convert(buildDesc.Inputs, pParams->pDesc->inputs, supportsOmm);
-        status != NVAPI_OK)
-        return status;
+    switch (commandList->GetAsConverter().Convert(buildDesc.Inputs, pParams->pDesc->inputs, supportsOmm)) {
+        case NVAPI_OK:
+            break;
+        case NVAPI_INVALID_ARGUMENT:
+            return InvalidArgument(n);
+        case NVAPI_NOT_SUPPORTED:
+            return NotSupported(n);
+        default:
+            return Error(n);
+    }
 
     pCommandList->BuildRaytracingAccelerationStructure(&buildDesc, pParams->numPostbuildInfoDescs,
         pParams->pPostbuildInfoDescs);
@@ -840,9 +855,16 @@ NVAPI_FUNCTION NvAPI_D3D12_GetRaytracingOpacityMicromapArrayPrebuildInfo(ID3D12D
 
     D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs;
     D3D12_RAYTRACING_OPACITY_MICROMAP_ARRAY_DESC arrayDesc;
-    if (auto status = OmmArrayInputsToD3d12(inputs, arrayDesc, *pParams->pDesc);
-        status != NVAPI_OK)
-        return status;
+    switch (OmmArrayInputsToD3d12(inputs, arrayDesc, *pParams->pDesc)) {
+        case NVAPI_OK:
+            break;
+        case NVAPI_INVALID_ARGUMENT:
+            return InvalidArgument(n);
+        case NVAPI_NOT_SUPPORTED:
+            return NotSupported(n);
+        default:
+            return Error(n);
+    }
 
     D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO d3d12Info;
     pDevice->GetRaytracingAccelerationStructurePrebuildInfo(&inputs, &d3d12Info);
@@ -976,9 +998,16 @@ NVAPI_FUNCTION NvAPI_D3D12_BuildRaytracingOpacityMicromapArray(ID3D12GraphicsCom
         }
     }
 
-    if (auto status = OmmArrayInputsToD3d12(buildDesc.Inputs, arrayDesc, pParams->pDesc->inputs);
-        status != NVAPI_OK)
-        return status;
+    switch (OmmArrayInputsToD3d12(buildDesc.Inputs, arrayDesc, pParams->pDesc->inputs)) {
+        case NVAPI_OK:
+            break;
+        case NVAPI_INVALID_ARGUMENT:
+            return InvalidArgument(n);
+        case NVAPI_NOT_SUPPORTED:
+            return NotSupported(n);
+        default:
+            return Error(n);
+    }
 
     pCommandList->BuildRaytracingAccelerationStructure(
         &buildDesc,
