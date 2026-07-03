@@ -181,10 +181,24 @@ namespace dxvk::env {
         return false;
     }
 
+    bool isNvidiaRtxPathTracingSample() {
+        static bool alreadyLogged = false;
+        if (getExecutableName() == std::string("Rtxpt.exe")) {
+            if (!std::exchange(alreadyLogged, true))
+                log::info(str::format("NVIDIA RTX Path Tracing Sample (Rtxpt.exe) detected"));
+
+            return true;
+        }
+
+        return false;
+    }
+
     bool isD3d12NvShaderExtnEnabled() {
         static bool alreadyLogged = false;
 
-        static bool enabled = getEnvVariable("DXVK_NVAPI_D3D12_NV_SHADER_EXTN") == "1";
+        static bool enabled = getEnvVariable("DXVK_NVAPI_D3D12_NV_SHADER_EXTN") == "1"
+            || isNvidiaRtxPathTracingSample();
+
         if (enabled) {
             if (!std::exchange(alreadyLogged, true))
                 log::info("Enabling experimental support for D3D12 NvShader extensions");

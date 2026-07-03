@@ -29,7 +29,17 @@ NVAPI_FUNCTION NvAPI_D3D12_IsNvShaderExtnOpCodeSupported(ID3D12Device* pDevice, 
     if (!device)
         return NoImplementation(n, alreadyLoggedNoImplementation);
 
-    *pSupported = env::isD3d12NvShaderExtnEnabled() && device->IsNvShaderExtnOpCodeSupported(opCode);
+    if (env::isNvidiaRtxPathTracingSample()) {
+        if (opCode == NV_EXTN_OP_SHFL) {
+            // NVIDIA RTX Path Tracing sample queries NV_EXTN_OP_SHFL for detecting HLSL extension UAV support,
+            // query NV_EXTN_OP_HIT_OBJECT_REORDER_THREAD instead since we want it to detect SER support
+            log::info("Querying NV_EXTN_OP_HIT_OBJECT_REORDER_THREAD for HLSL support for NVIDIA RTX Path Tracing Sample");
+            *pSupported = device->IsNvShaderExtnOpCodeSupported(NV_EXTN_OP_HIT_OBJECT_REORDER_THREAD);
+        } else {
+            *pSupported = device->IsNvShaderExtnOpCodeSupported(opCode);
+        }
+    } else
+        *pSupported = env::isD3d12NvShaderExtnEnabled() && device->IsNvShaderExtnOpCodeSupported(opCode);
 
     return Ok(str::format(n, " (", opCode, "/", fromCode(opCode), ": ", *pSupported ? "Supported)" : "Unsupported)"));
 }
