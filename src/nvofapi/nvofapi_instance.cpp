@@ -24,7 +24,6 @@
 #include "nvofapi_image.h"
 #include "nvofapi_instance.h"
 #include "../util/util_log.h"
-#include "../util/util_statuscode.h"
 
 namespace dxvk {
 
@@ -126,27 +125,28 @@ namespace dxvk {
         auto ret = m_vkCreateOpticalFlowSessionNV(m_vkDevice, &createInfo, nullptr, &m_vkOfaSession);
 
         if (ret == VK_SUCCESS) {
-            return Success();
+            return NV_OF_SUCCESS;
         }
 
-        return ErrorGeneric();
+        return NV_OF_ERR_GENERIC;
     }
 
     NV_OF_STATUS NvOFInstance::BindImageToSession(NvOFGPUBufferHandle hBuffer, VkOpticalFlowSessionBindingPointNV bindingPoint) const {
         auto nvOFImage = reinterpret_cast<NvOFImage*>(hBuffer);
 
         if (!nvOFImage)
-            return ErrorGeneric();
+            return NV_OF_ERR_GENERIC;
 
         auto ret = m_vkBindOpticalFlowSessionImageNV(m_vkDevice,
             m_vkOfaSession,
             bindingPoint,
             nvOFImage->ImageView(),
             VK_IMAGE_LAYOUT_GENERAL);
-        if (ret != VK_SUCCESS) {
-            return ErrorGeneric();
-        }
-        return Success();
+
+        if (ret != VK_SUCCESS)
+            return NV_OF_ERR_GENERIC;
+
+        return NV_OF_SUCCESS;
     }
 
     NV_OF_STATUS NvOFInstance::GetCaps(NV_OF_CAPS param, uint32_t* capsVal, uint32_t* size) const {
@@ -157,9 +157,9 @@ namespace dxvk {
             }
 
             // XXX[ljm] query VkPhysicalDevice for actual support
-            return Success();
+            return NV_OF_SUCCESS;
         }
-        return ErrorGeneric();
+        return NV_OF_ERR_GENERIC;
     }
 
     void NvOFInstance::RegisterBuffer(const NV_OF_REGISTER_RESOURCE_PARAMS_VK* registerParams) const {

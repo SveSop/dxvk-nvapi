@@ -41,7 +41,10 @@ NVOFAPI_FUNCTION OFSessionInit(NvOFHandle hOf, const NV_OF_INIT_PARAMS* initPara
         return ErrorGeneric(n);
     }
 
-    return nvOF->InitSession(initParams);
+    if (nvOF->InitSession(initParams) != NV_OF_SUCCESS)
+        return ErrorGeneric(n);
+
+    return Success(n);
 }
 
 NVOFAPI_FUNCTION OFSessionDestroy(NvOFHandle hOf) {
