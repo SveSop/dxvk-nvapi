@@ -56,7 +56,7 @@ namespace dxvk {
     }
 
     NV_OF_STATUS NvOFInstance::InitSession(const NV_OF_INIT_PARAMS* initParams) {
-        constexpr auto n = __func__;
+        static constexpr auto n = __func__;
 
         if (log::tracing())
             log::trace(n,

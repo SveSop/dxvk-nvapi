@@ -5,7 +5,7 @@
 using namespace dxvk;
 
 NVOFAPI_FUNCTION NvOFAPICreateInstanceD3D11(uint32_t apiVer, NV_OF_D3D11_API_FUNCTION_LIST* functionList) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, apiVer, log::fmt::ptr(functionList));

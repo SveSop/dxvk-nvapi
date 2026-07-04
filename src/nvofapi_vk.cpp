@@ -38,7 +38,7 @@ using namespace dxvk;
 
 // VK entrypoints
 NVOFAPI_FUNCTION CreateOpticalFlowVk(VkInstance vkInstance, VkPhysicalDevice vkPhysicalDevice, VkDevice vkDevice, NvOFHandle* hOFInstance) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(vkInstance), log::fmt::hnd(vkPhysicalDevice), log::fmt::hnd(vkDevice), log::fmt::ptr(hOFInstance));
@@ -59,7 +59,7 @@ NVOFAPI_FUNCTION CreateOpticalFlowVk(VkInstance vkInstance, VkPhysicalDevice vkP
 }
 
 NVOFAPI_FUNCTION GetSurfaceFormatCountVk(NvOFHandle hOf, const NV_OF_BUFFER_USAGE bufferUsage, const NV_OF_MODE ofMode, uint32_t* const pCount) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), bufferUsage, ofMode, log::fmt::ptr(pCount));
@@ -68,7 +68,7 @@ NVOFAPI_FUNCTION GetSurfaceFormatCountVk(NvOFHandle hOf, const NV_OF_BUFFER_USAG
 }
 
 NVOFAPI_FUNCTION GetSurfaceFormatVk(NvOFHandle hOf, const NV_OF_BUFFER_USAGE bufferUsage, const NV_OF_MODE ofMode, VkFormat* const pFormat) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), bufferUsage, ofMode, log::fmt::ptr(pFormat));
@@ -77,7 +77,7 @@ NVOFAPI_FUNCTION GetSurfaceFormatVk(NvOFHandle hOf, const NV_OF_BUFFER_USAGE buf
 }
 
 NVOFAPI_FUNCTION RegisterResourceVk(NvOFHandle hOf, NV_OF_REGISTER_RESOURCE_PARAMS_VK* registerParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), log::fmt::ptr(registerParams));
@@ -88,7 +88,7 @@ NVOFAPI_FUNCTION RegisterResourceVk(NvOFHandle hOf, NV_OF_REGISTER_RESOURCE_PARA
 }
 
 NVOFAPI_FUNCTION UnregisterResourceVk(NV_OF_UNREGISTER_RESOURCE_PARAMS_VK* registerParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(registerParams));
@@ -99,7 +99,7 @@ NVOFAPI_FUNCTION UnregisterResourceVk(NV_OF_UNREGISTER_RESOURCE_PARAMS_VK* regis
 }
 
 NVOFAPI_FUNCTION ExecuteVk(NvOFHandle hOf, const NV_OF_EXECUTE_INPUT_PARAMS_VK* executeInParams, NV_OF_EXECUTE_OUTPUT_PARAMS_VK* executeOutParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
 
     if (log::tracing())
@@ -116,7 +116,7 @@ NVOFAPI_FUNCTION ExecuteVk(NvOFHandle hOf, const NV_OF_EXECUTE_INPUT_PARAMS_VK* 
 NVOFAPI_CREATE_INSTANCE NvOFAPICreateInstanceVk(uint32_t apiVer, NV_OF_VK_API_FUNCTION_LIST* functionList) {
     uint32_t apiVerMajor = (apiVer & 0xfffffff0) >> 4;
     uint32_t apiVerMinor = (apiVer & 0xf);
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, apiVer, log::fmt::ptr(functionList));
