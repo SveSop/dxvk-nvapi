@@ -126,12 +126,18 @@ namespace dxvk::log {
         }
     }
 
+    enum Level : uint8_t {
+        NONE,
+        INFO,
+        TRACE
+    };
+
     bool tracing();
 
-    void write(const std::string& level, const std::string& message);
+    void write(Level level, std::string_view message);
 
-    inline void info(const std::string& message) {
-        log::write("info", message);
+    inline void info(const std::string_view message) {
+        log::write(INFO, message);
     }
 
     template <typename T>
@@ -145,14 +151,14 @@ namespace dxvk::log {
         append(str, args...);
     }
 
-    inline void trace(const std::string& name) {
-        log::write("trace", name);
+    inline void trace(const std::string_view name) {
+        log::write(TRACE, name);
     }
 
     template <typename... Args>
-    void trace(const std::string& name, const Args&... args) {
+    void trace(const std::string_view name, const Args&... args) {
         std::stringstream stream;
         append(stream, args...);
-        log::write("trace", str::format(name, " (", stream.str(), ")"));
+        log::write(TRACE, str::format(name, " (", stream.str(), ")"));
     }
 }
