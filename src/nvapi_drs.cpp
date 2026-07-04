@@ -12,7 +12,7 @@ static auto nvapiDrsProfile = reinterpret_cast<NvDRSProfileHandle>(&drs);
 using namespace dxvk;
 
 NVAPI_FUNCTION NvAPI_DRS_CreateSession(NvDRSSessionHandle* phSession) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(phSession));
@@ -26,7 +26,7 @@ NVAPI_FUNCTION NvAPI_DRS_CreateSession(NvDRSSessionHandle* phSession) {
 }
 
 NVAPI_FUNCTION NvAPI_DRS_LoadSettings(NvDRSSessionHandle hSession) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession));
@@ -35,7 +35,7 @@ NVAPI_FUNCTION NvAPI_DRS_LoadSettings(NvDRSSessionHandle hSession) {
 }
 
 NVAPI_FUNCTION NvAPI_DRS_SaveSettings(NvDRSSessionHandle hSession) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession));
@@ -44,7 +44,7 @@ NVAPI_FUNCTION NvAPI_DRS_SaveSettings(NvDRSSessionHandle hSession) {
 }
 
 NVAPI_FUNCTION NvAPI_DRS_SetSetting(NvDRSSessionHandle hSession, NvDRSProfileHandle hProfile, NVDRS_SETTING* pSetting) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::hnd(hProfile), log::fmt::ptr(pSetting));
@@ -53,7 +53,7 @@ NVAPI_FUNCTION NvAPI_DRS_SetSetting(NvDRSSessionHandle hSession, NvDRSProfileHan
 }
 
 NVAPI_FUNCTION NvAPI_DRS_FindProfileByName(NvDRSSessionHandle hSession, NvAPI_UnicodeString profileName, NvDRSProfileHandle* phProfile) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::ptr(profileName), log::fmt::ptr(phProfile));
@@ -67,7 +67,7 @@ NVAPI_FUNCTION NvAPI_DRS_FindProfileByName(NvDRSSessionHandle hSession, NvAPI_Un
 }
 
 NVAPI_FUNCTION NvAPI_DRS_FindApplicationByName(NvDRSSessionHandle hSession, NvAPI_UnicodeString appName, NvDRSProfileHandle* phProfile, NVDRS_APPLICATION* pApplication) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::ptr(appName), log::fmt::ptr(phProfile), log::fmt::ptr(pApplication));
@@ -104,7 +104,7 @@ NVAPI_FUNCTION NvAPI_DRS_FindApplicationByName(NvDRSSessionHandle hSession, NvAP
 }
 
 NVAPI_FUNCTION NvAPI_DRS_GetBaseProfile(NvDRSSessionHandle hSession, NvDRSProfileHandle* phProfile) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::ptr(phProfile));
@@ -118,7 +118,7 @@ NVAPI_FUNCTION NvAPI_DRS_GetBaseProfile(NvDRSSessionHandle hSession, NvDRSProfil
 }
 
 NVAPI_FUNCTION NvAPI_DRS_GetCurrentGlobalProfile(NvDRSSessionHandle hSession, NvDRSProfileHandle* phProfile) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::ptr(phProfile));
@@ -132,7 +132,7 @@ NVAPI_FUNCTION NvAPI_DRS_GetCurrentGlobalProfile(NvDRSSessionHandle hSession, Nv
 }
 
 NVAPI_FUNCTION NvAPI_DRS_CreateProfile(NvDRSSessionHandle hSession, NVDRS_PROFILE* pProfileInfo, NvDRSProfileHandle* phProfile) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::ptr(pProfileInfo), log::fmt::ptr(phProfile));
@@ -141,7 +141,7 @@ NVAPI_FUNCTION NvAPI_DRS_CreateProfile(NvDRSSessionHandle hSession, NVDRS_PROFIL
 }
 
 NVAPI_FUNCTION NvAPI_DRS_DeleteProfile(NvDRSSessionHandle hSession, NvDRSProfileHandle hProfile) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession));
@@ -174,7 +174,7 @@ inline static std::string GetSettingName(NvU32 settingId) {
 }
 
 NVAPI_FUNCTION NvAPI_DRS_GetSetting(NvDRSSessionHandle hSession, NvDRSProfileHandle hProfile, NvU32 settingId, NVDRS_SETTING* pSetting) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     static const auto nvapiDrsSettingsEnvName = "DXVK_NVAPI_DRS_SETTINGS";
     static const auto nvapiDrsSettingsEnvPrefix = "DXVK_NVAPI_DRS_";
     static const auto nvapiDrsSettingsString = dxvk::env::getEnvVariable(nvapiDrsSettingsEnvName);
@@ -227,7 +227,7 @@ NVAPI_FUNCTION NvAPI_DRS_GetSetting(NvDRSSessionHandle hSession, NvDRSProfileHan
 }
 
 NVAPI_FUNCTION NvAPI_DRS_GetProfileInfo(NvDRSSessionHandle hSession, NvDRSProfileHandle hProfile, NVDRS_PROFILE* pProfileInfo) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::hnd(hProfile), log::fmt::ptr(pProfileInfo));
@@ -248,7 +248,7 @@ NVAPI_FUNCTION NvAPI_DRS_GetProfileInfo(NvDRSSessionHandle hSession, NvDRSProfil
 }
 
 NVAPI_FUNCTION NvAPI_DRS_CreateApplication(NvDRSSessionHandle hSession, NvDRSProfileHandle hProfile, NVDRS_APPLICATION* pApplication) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession), log::fmt::hnd(hProfile), log::fmt::ptr(pApplication));
@@ -257,7 +257,7 @@ NVAPI_FUNCTION NvAPI_DRS_CreateApplication(NvDRSSessionHandle hSession, NvDRSPro
 }
 
 NVAPI_FUNCTION NvAPI_DRS_DestroySession(NvDRSSessionHandle hSession) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hSession));

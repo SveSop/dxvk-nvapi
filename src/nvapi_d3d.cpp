@@ -7,7 +7,7 @@
 using namespace dxvk;
 
 NVAPI_FUNCTION NvAPI_D3D_RegisterDevice(IUnknown* pDev) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pDev));
@@ -17,7 +17,7 @@ NVAPI_FUNCTION NvAPI_D3D_RegisterDevice(IUnknown* pDev) {
 }
 
 NVAPI_FUNCTION NvAPI_D3D_GetObjectHandleForResource(IUnknown* pDevice, IUnknown* pResource, NVDX_ObjectHandle* pHandle) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLogged = false;
 
     if (log::tracing())
@@ -33,7 +33,7 @@ NVAPI_FUNCTION NvAPI_D3D_GetObjectHandleForResource(IUnknown* pDevice, IUnknown*
 }
 
 NVAPI_FUNCTION NvAPI_D3D_SetResourceHint(IUnknown* pDev, NVDX_ObjectHandle obj, NVAPI_D3D_SETRESOURCEHINT_CATEGORY dwHintCategory, NvU32 dwHintName, NvU32* pdwHintValue) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLogged = false;
 
     if (log::tracing())
@@ -43,7 +43,7 @@ NVAPI_FUNCTION NvAPI_D3D_SetResourceHint(IUnknown* pDev, NVDX_ObjectHandle obj, 
 }
 
 NVAPI_FUNCTION NvAPI_D3D_BeginResourceRendering(IUnknown* pDeviceOrContext, NVDX_ObjectHandle obj, NvU32 Flags) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLogged = false;
 
     if (log::tracing())
@@ -54,7 +54,7 @@ NVAPI_FUNCTION NvAPI_D3D_BeginResourceRendering(IUnknown* pDeviceOrContext, NVDX
 }
 
 NVAPI_FUNCTION NvAPI_D3D_EndResourceRendering(IUnknown* pDeviceOrContext, NVDX_ObjectHandle obj, NvU32 Flags) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLogged = false;
 
     if (log::tracing())
@@ -64,7 +64,7 @@ NVAPI_FUNCTION NvAPI_D3D_EndResourceRendering(IUnknown* pDeviceOrContext, NVDX_O
 }
 
 NVAPI_FUNCTION NvAPI_D3D_GetCurrentSLIState(IUnknown* pDevice, NV_GET_CURRENT_SLI_STATE* pSliState) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedNoSli = false;
     thread_local bool alreadyLoggedOk = false;
 
@@ -124,7 +124,7 @@ NVAPI_FUNCTION NvAPI_D3D_GetCurrentSLIState(IUnknown* pDevice, NV_GET_CURRENT_SL
 }
 
 NVAPI_FUNCTION NvAPI_D3D_ImplicitSLIControl(IMPLICIT_SLI_CONTROL implicitSLIControl) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, implicitSLIControl);
@@ -136,7 +136,7 @@ NVAPI_FUNCTION NvAPI_D3D_ImplicitSLIControl(IMPLICIT_SLI_CONTROL implicitSLICont
 }
 
 NVAPI_FUNCTION NvAPI_D3D1x_GetGraphicsCapabilities(IUnknown* pDevice, NvU32 structVersion, NV_D3D1x_GRAPHICS_CAPS* pGraphicsCaps) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
 
     if (log::tracing())
@@ -172,7 +172,7 @@ NVAPI_FUNCTION NvAPI_D3D1x_GetGraphicsCapabilities(IUnknown* pDevice, NvU32 stru
 }
 
 NVAPI_FUNCTION NvAPI_D3D1x_Present(IUnknown* pDevice, IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedDeviceBusy = false;
     thread_local bool alreadyLoggedOk = false;
 
@@ -196,7 +196,7 @@ NVAPI_FUNCTION NvAPI_D3D1x_Present(IUnknown* pDevice, IDXGISwapChain* pSwapChain
 }
 
 NVAPI_FUNCTION NvAPI_D3D_Sleep(IUnknown* pDevice) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
     thread_local bool alreadyLoggedNoImplementation = false;
     thread_local bool alreadyLoggedError = false;
@@ -228,7 +228,7 @@ NVAPI_FUNCTION NvAPI_D3D_Sleep(IUnknown* pDevice) {
 }
 
 NVAPI_FUNCTION NvAPI_D3D_SetSleepMode(IUnknown* pDevice, NV_SET_SLEEP_MODE_PARAMS* pSetSleepModeParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
     thread_local bool alreadyLoggedNoImplementation = false;
     thread_local bool alreadyLoggedError = false;
@@ -271,7 +271,7 @@ NVAPI_FUNCTION NvAPI_D3D_SetSleepMode(IUnknown* pDevice, NV_SET_SLEEP_MODE_PARAM
 }
 
 NVAPI_FUNCTION NvAPI_D3D_GetSleepStatus(IUnknown* pDevice, NV_GET_SLEEP_STATUS_PARAMS* pGetSleepStatusParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
     thread_local bool alreadyLoggedNoImplementation = false;
 
@@ -300,7 +300,7 @@ NVAPI_FUNCTION NvAPI_D3D_GetSleepStatus(IUnknown* pDevice, NV_GET_SLEEP_STATUS_P
 }
 
 NVAPI_FUNCTION NvAPI_D3D_GetLatency(IUnknown* pDev, NV_LATENCY_RESULT_PARAMS* pGetLatencyParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
     thread_local bool alreadyLoggedNoImplementation = false;
     thread_local bool alreadyLoggedError = false;
@@ -335,7 +335,7 @@ NVAPI_FUNCTION NvAPI_D3D_GetLatency(IUnknown* pDev, NV_LATENCY_RESULT_PARAMS* pG
 }
 
 NVAPI_FUNCTION NvAPI_D3D_SetLatencyMarker(IUnknown* pDev, NV_LATENCY_MARKER_PARAMS* pSetLatencyMarkerParams) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
     thread_local bool alreadyLoggedOk = false;
     thread_local bool alreadyLoggedNoImplementation = false;
     thread_local bool alreadyLoggedError = false;

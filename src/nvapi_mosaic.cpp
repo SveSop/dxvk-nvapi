@@ -4,7 +4,7 @@
 using namespace dxvk;
 
 NVAPI_FUNCTION NvAPI_Mosaic_GetDisplayViewportsByResolution(NvU32 displayId, NvU32 srcWidth, NvU32 srcHeight, NV_RECT viewports[NV_MOSAIC_MAX_DISPLAYS], NvU8* bezelCorrected) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, displayId, srcWidth, srcHeight, log::fmt::ptr(viewports), log::fmt::ptr(bezelCorrected));

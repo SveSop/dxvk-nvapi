@@ -39,7 +39,7 @@ static void logDisabled() {
 }
 
 NVAPI_QUERY_INTERFACE nvapi_QueryInterface(NvU32 id) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     static std::unordered_map<NvU32, void*> registry;
     static std::mutex registryMutex;

@@ -69,7 +69,7 @@ inline static NvU32 BitsPerColorToColorDepth(uint16_t bitsPerColor) {
 }
 
 NVAPI_FUNCTION NvAPI_Disp_GetHdrCapabilities(NvU32 displayId, NV_HDR_CAPABILITIES* pHdrCapabilities) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, displayId, log::fmt::ptr(pHdrCapabilities));
@@ -147,7 +147,7 @@ NVAPI_FUNCTION NvAPI_Disp_GetHdrCapabilities(NvU32 displayId, NV_HDR_CAPABILITIE
 }
 
 NVAPI_FUNCTION NvAPI_Disp_HdrColorControl(NvU32 displayId, NV_HDR_COLOR_DATA* pHdrColorData) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, displayId, log::fmt::ptr(pHdrColorData));
@@ -244,7 +244,7 @@ NVAPI_FUNCTION NvAPI_Disp_HdrColorControl(NvU32 displayId, NV_HDR_COLOR_DATA* pH
 }
 
 NVAPI_FUNCTION NvAPI_DISP_GetDisplayIdByDisplayName(const char* displayName, NvU32* displayId) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(displayName), log::fmt::ptr(displayId));
@@ -265,7 +265,7 @@ NVAPI_FUNCTION NvAPI_DISP_GetDisplayIdByDisplayName(const char* displayName, NvU
 }
 
 NVAPI_FUNCTION NvAPI_DISP_GetGDIPrimaryDisplayId(NvU32* displayId) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(displayId));
@@ -286,7 +286,7 @@ NVAPI_FUNCTION NvAPI_DISP_GetGDIPrimaryDisplayId(NvU32* displayId) {
 }
 
 NVAPI_FUNCTION NvAPI_DISP_GetDisplayConfig(NvU32* pathInfoCount, NV_DISPLAYCONFIG_PATH_INFO* pathInfo) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pathInfoCount), log::fmt::ptr(pathInfo));
@@ -418,7 +418,7 @@ NVAPI_FUNCTION NvAPI_DISP_GetDisplayConfig(NvU32* pathInfoCount, NV_DISPLAYCONFI
 }
 
 NVAPI_FUNCTION NvAPI_DISP_SetDisplayConfig(NvU32 pathInfoCount, NV_DISPLAYCONFIG_PATH_INFO* pathInfo, NvU32 flags) {
-    constexpr auto n = __func__;
+    static constexpr auto n = __func__;
 
     if (log::tracing())
         log::trace(n, pathInfoCount, log::fmt::ptr(pathInfo), log::fmt::flags(flags));
