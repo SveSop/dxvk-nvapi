@@ -38,7 +38,7 @@ using namespace dxvk;
 
 // D3D12 entrypoints
 NVOFAPI_FUNCTION CreateOpticalFlowD3D12(ID3D12Device* pD3D12Device, NvOFHandle* hOFInstance) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pD3D12Device), log::fmt::ptr(hOFInstance));
@@ -65,7 +65,7 @@ NVOFAPI_FUNCTION CreateOpticalFlowD3D12(ID3D12Device* pD3D12Device, NvOFHandle* 
 }
 
 NVOFAPI_FUNCTION GetSurfaceFormatCountD3D12(NvOFHandle hOf, const NV_OF_BUFFER_USAGE bufferUsage, const NV_OF_MODE ofMode, uint32_t* const pCount) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), bufferUsage, ofMode, log::fmt::ptr(pCount));
@@ -75,7 +75,7 @@ NVOFAPI_FUNCTION GetSurfaceFormatCountD3D12(NvOFHandle hOf, const NV_OF_BUFFER_U
 }
 
 NVOFAPI_FUNCTION GetSurfaceFormatD3D12(NvOFHandle hOf, const NV_OF_BUFFER_USAGE bufferUsage, const NV_OF_MODE ofMode, DXGI_FORMAT* const pFormat) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), bufferUsage, ofMode, log::fmt::ptr(pFormat));
@@ -88,7 +88,7 @@ NVOFAPI_FUNCTION GetSurfaceFormatD3D12(NvOFHandle hOf, const NV_OF_BUFFER_USAGE 
 }
 
 NVOFAPI_FUNCTION RegisterResourceD3D12(NvOFHandle hOf, NV_OF_REGISTER_RESOURCE_PARAMS_D3D12* registerParams) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), log::fmt::ptr(registerParams));
@@ -100,7 +100,7 @@ NVOFAPI_FUNCTION RegisterResourceD3D12(NvOFHandle hOf, NV_OF_REGISTER_RESOURCE_P
 }
 
 NVOFAPI_FUNCTION UnregisterResourceD3D12(NV_OF_UNREGISTER_RESOURCE_PARAMS_D3D12* registerParams) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(registerParams));
@@ -111,7 +111,7 @@ NVOFAPI_FUNCTION UnregisterResourceD3D12(NV_OF_UNREGISTER_RESOURCE_PARAMS_D3D12*
 }
 
 NVOFAPI_FUNCTION ExecuteD3D12(NvOFHandle hOf, const NV_OF_EXECUTE_INPUT_PARAMS_D3D12* executeInParams, NV_OF_EXECUTE_OUTPUT_PARAMS_D3D12* executeOutParams) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
     thread_local bool alreadyLoggedOk = false;
 
     if (log::tracing())
@@ -127,7 +127,7 @@ NVOFAPI_FUNCTION ExecuteD3D12(NvOFHandle hOf, const NV_OF_EXECUTE_INPUT_PARAMS_D
 NVOFAPI_FUNCTION NvOFAPICreateInstanceD3D12(uint32_t apiVer, NV_OF_D3D12_API_FUNCTION_LIST* functionList) {
     uint32_t apiVerMajor = (apiVer & 0xfffffff0) >> 4;
     uint32_t apiVerMinor = (apiVer & 0xf);
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, apiVer, log::fmt::ptr(functionList));

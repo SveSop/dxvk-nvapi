@@ -30,7 +30,7 @@ using namespace dxvk;
 
 // Common entrypoints
 NVOFAPI_FUNCTION OFSessionInit(NvOFHandle hOf, const NV_OF_INIT_PARAMS* initParams) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), log::fmt::ptr(initParams));
@@ -48,7 +48,7 @@ NVOFAPI_FUNCTION OFSessionInit(NvOFHandle hOf, const NV_OF_INIT_PARAMS* initPara
 }
 
 NVOFAPI_FUNCTION OFSessionDestroy(NvOFHandle hOf) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf));
@@ -63,7 +63,7 @@ NVOFAPI_FUNCTION OFSessionDestroy(NvOFHandle hOf) {
 }
 
 NVOFAPI_FUNCTION OFSessionGetLastError(NvOFHandle hOf, char lastError[], uint32_t* size) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), log::fmt::ptr(lastError), log::fmt::ptr(size));
@@ -72,7 +72,7 @@ NVOFAPI_FUNCTION OFSessionGetLastError(NvOFHandle hOf, char lastError[], uint32_
 }
 
 NVOFAPI_FUNCTION OFSessionGetCaps(NvOFHandle hOf, NV_OF_CAPS capsParam, uint32_t* capsVal, uint32_t* size) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hOf), capsParam, log::fmt::ptr(capsVal), log::fmt::ptr(size));
@@ -83,7 +83,7 @@ NVOFAPI_FUNCTION OFSessionGetCaps(NvOFHandle hOf, NV_OF_CAPS capsParam, uint32_t
 }
 
 NVOFAPI_FUNCTION NvOFGetMaxSupportedApiVersion(uint32_t* version) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(version));

@@ -5,7 +5,7 @@
 using namespace dxvk;
 
 NVOFAPI_FUNCTION NvOFAPICreateInstanceCuda(uint32_t apiVer, void* functionList) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, apiVer, log::fmt::ptr(functionList));
