@@ -6,7 +6,7 @@
 using namespace dxvk;
 
 NVAPI_FUNCTION NvAPI_SYS_GetPhysicalGpuFromDisplayId(NvU32 displayId, NvPhysicalGpuHandle* hPhysicalGpu) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, displayId, log::fmt::ptr(hPhysicalGpu));
@@ -27,7 +27,7 @@ NVAPI_FUNCTION NvAPI_SYS_GetPhysicalGpuFromDisplayId(NvU32 displayId, NvPhysical
 }
 
 NVAPI_FUNCTION NvAPI_SYS_GetDriverAndBranchVersion(NvU32* pDriverVersion, NvAPI_ShortString szBuildBranchString) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pDriverVersion), log::fmt::ptr(szBuildBranchString));
@@ -45,7 +45,7 @@ NVAPI_FUNCTION NvAPI_SYS_GetDriverAndBranchVersion(NvU32* pDriverVersion, NvAPI_
 }
 
 NVAPI_FUNCTION NvAPI_SYS_GetDisplayDriverInfo(NV_DISPLAY_DRIVER_INFO* pDriverInfo) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pDriverInfo));
@@ -90,7 +90,7 @@ NVAPI_FUNCTION NvAPI_SYS_GetDisplayDriverInfo(NV_DISPLAY_DRIVER_INFO* pDriverInf
 }
 
 NVAPI_FUNCTION NvAPI_SYS_GetPhysicalGPUs(NV_PHYSICAL_GPUS* pPhysicalGPUs) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pPhysicalGPUs));
@@ -115,7 +115,7 @@ NVAPI_FUNCTION NvAPI_SYS_GetPhysicalGPUs(NV_PHYSICAL_GPUS* pPhysicalGPUs) {
 }
 
 NVAPI_FUNCTION NvAPI_SYS_GetLogicalGPUs(NV_LOGICAL_GPUS* pLogicalGPUs) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(pLogicalGPUs));

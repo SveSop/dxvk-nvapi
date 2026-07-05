@@ -14,7 +14,7 @@ static auto initializationMutex = std::mutex{};
 using namespace dxvk;
 
 NVAPI_FUNCTION NvAPI_EnumLogicalGPUs(NvLogicalGpuHandle nvGPUHandle[NVAPI_MAX_LOGICAL_GPUS], NvU32* pGpuCount) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(nvGPUHandle), log::fmt::ptr(pGpuCount));
@@ -34,7 +34,7 @@ NVAPI_FUNCTION NvAPI_EnumLogicalGPUs(NvLogicalGpuHandle nvGPUHandle[NVAPI_MAX_LO
 }
 
 NVAPI_FUNCTION NvAPI_EnumPhysicalGPUs(NvPhysicalGpuHandle nvGPUHandle[NVAPI_MAX_PHYSICAL_GPUS], NvU32* pGpuCount) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(nvGPUHandle), log::fmt::ptr(pGpuCount));
@@ -54,7 +54,7 @@ NVAPI_FUNCTION NvAPI_EnumPhysicalGPUs(NvPhysicalGpuHandle nvGPUHandle[NVAPI_MAX_
 }
 
 NVAPI_FUNCTION NvAPI_EnumTCCPhysicalGPUs(NvPhysicalGpuHandle nvGPUHandle[NVAPI_MAX_PHYSICAL_GPUS], NvU32* pGpuCount) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(nvGPUHandle), log::fmt::ptr(pGpuCount));
@@ -75,7 +75,7 @@ NVAPI_FUNCTION NvAPI_EnumTCCPhysicalGPUs(NvPhysicalGpuHandle nvGPUHandle[NVAPI_M
 }
 
 NVAPI_FUNCTION NvAPI_GetGPUIDfromPhysicalGPU(NvPhysicalGpuHandle hPhysicalGpu, NvU32* pGpuId) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hPhysicalGpu), log::fmt::ptr(pGpuId));
@@ -97,7 +97,7 @@ NVAPI_FUNCTION NvAPI_GetGPUIDfromPhysicalGPU(NvPhysicalGpuHandle hPhysicalGpu, N
 }
 
 NVAPI_FUNCTION NvAPI_GetPhysicalGPUFromGPUID(NvU32 gpuId, NvPhysicalGpuHandle* hPhysicalGpu) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, gpuId, log::fmt::ptr(hPhysicalGpu));
@@ -122,7 +122,7 @@ NVAPI_FUNCTION NvAPI_GetPhysicalGPUFromGPUID(NvU32 gpuId, NvPhysicalGpuHandle* h
 }
 
 NVAPI_FUNCTION NvAPI_GetDisplayDriverVersion(NvDisplayHandle hNvDisplay, NV_DISPLAY_DRIVER_VERSION* pVersion) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hNvDisplay), log::fmt::ptr(pVersion));
@@ -147,7 +147,7 @@ NVAPI_FUNCTION NvAPI_GetDisplayDriverVersion(NvDisplayHandle hNvDisplay, NV_DISP
 }
 
 NVAPI_FUNCTION NvAPI_GetLogicalGPUFromPhysicalGPU(NvPhysicalGpuHandle hPhysicalGPU, NvLogicalGpuHandle* pLogicalGPU) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hPhysicalGPU), log::fmt::ptr(pLogicalGPU));
@@ -168,7 +168,7 @@ NVAPI_FUNCTION NvAPI_GetLogicalGPUFromPhysicalGPU(NvPhysicalGpuHandle hPhysicalG
 }
 
 NVAPI_FUNCTION NvAPI_GetLogicalGPUFromDisplay(NvDisplayHandle hNvDisp, NvLogicalGpuHandle* pLogicalGPU) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hNvDisp), log::fmt::ptr(pLogicalGPU));
@@ -189,7 +189,7 @@ NVAPI_FUNCTION NvAPI_GetLogicalGPUFromDisplay(NvDisplayHandle hNvDisp, NvLogical
 }
 
 NVAPI_FUNCTION NvAPI_GetPhysicalGPUsFromLogicalGPU(NvLogicalGpuHandle hLogicalGPU, NvPhysicalGpuHandle hPhysicalGPU[NVAPI_MAX_PHYSICAL_GPUS], NvU32* pGpuCount) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hLogicalGPU), log::fmt::ptr(hPhysicalGPU), log::fmt::ptr(pGpuCount));
@@ -211,7 +211,7 @@ NVAPI_FUNCTION NvAPI_GetPhysicalGPUsFromLogicalGPU(NvLogicalGpuHandle hLogicalGP
 }
 
 NVAPI_FUNCTION NvAPI_GetPhysicalGPUsFromDisplay(NvDisplayHandle hNvDisp, NvPhysicalGpuHandle nvGPUHandle[NVAPI_MAX_PHYSICAL_GPUS], NvU32* pGpuCount) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(hNvDisp), log::fmt::ptr(nvGPUHandle), log::fmt::ptr(pGpuCount));
@@ -233,7 +233,7 @@ NVAPI_FUNCTION NvAPI_GetPhysicalGPUsFromDisplay(NvDisplayHandle hNvDisp, NvPhysi
 }
 
 NVAPI_FUNCTION NvAPI_EnumNvidiaDisplayHandle(NvU32 thisEnum, NvDisplayHandle* pNvDispHandle) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, thisEnum, log::fmt::ptr(pNvDispHandle));
@@ -254,7 +254,7 @@ NVAPI_FUNCTION NvAPI_EnumNvidiaDisplayHandle(NvU32 thisEnum, NvDisplayHandle* pN
 }
 
 NVAPI_FUNCTION NvAPI_EnumNvidiaUnAttachedDisplayHandle(NvU32 thisEnum, NvUnAttachedDisplayHandle* pNvUnAttachedDispHandle) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, thisEnum, log::fmt::ptr(pNvUnAttachedDispHandle));
@@ -264,7 +264,7 @@ NVAPI_FUNCTION NvAPI_EnumNvidiaUnAttachedDisplayHandle(NvU32 thisEnum, NvUnAttac
 }
 
 NVAPI_FUNCTION NvAPI_GetAssociatedNvidiaDisplayName(NvDisplayHandle NvDispHandle, NvAPI_ShortString szDisplayName) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::hnd(NvDispHandle), log::fmt::ptr(szDisplayName));
@@ -285,7 +285,7 @@ NVAPI_FUNCTION NvAPI_GetAssociatedNvidiaDisplayName(NvDisplayHandle NvDispHandle
 }
 
 NVAPI_FUNCTION NvAPI_GetAssociatedNvidiaDisplayHandle(const char* szDisplayName, NvDisplayHandle* pNvDispHandle) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(szDisplayName), log::fmt::ptr(pNvDispHandle));
@@ -306,7 +306,7 @@ NVAPI_FUNCTION NvAPI_GetAssociatedNvidiaDisplayHandle(const char* szDisplayName,
 }
 
 NVAPI_FUNCTION NvAPI_GetInterfaceVersionString(NvAPI_ShortString szDesc) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, log::fmt::ptr(szDesc));
@@ -321,7 +321,7 @@ NVAPI_FUNCTION NvAPI_GetInterfaceVersionString(NvAPI_ShortString szDesc) {
 }
 
 NVAPI_FUNCTION NvAPI_GetErrorMessage(NvAPI_Status nr, NvAPI_ShortString szDesc) {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n, nr, log::fmt::ptr(szDesc));
@@ -336,7 +336,7 @@ NVAPI_FUNCTION NvAPI_GetErrorMessage(NvAPI_Status nr, NvAPI_ShortString szDesc) 
 }
 
 NVAPI_FUNCTION NvAPI_Unload() {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n);
@@ -353,7 +353,7 @@ NVAPI_FUNCTION NvAPI_Unload() {
 }
 
 NVAPI_FUNCTION NvAPI_Initialize() {
-    static constexpr auto n = __func__;
+    static constexpr auto n = FUNC;
 
     if (log::tracing())
         log::trace(n);
