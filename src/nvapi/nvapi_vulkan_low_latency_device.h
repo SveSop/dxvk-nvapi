@@ -5,16 +5,17 @@
 
 namespace dxvk {
 
+    enum class LowLatencyDeviceImplementation : uint8_t {
+        LowLatency2,
+        VkReflexFake
+    };
+
     struct NvapiVulkanLowLatencyDevice {
-        virtual ~NvapiVulkanLowLatencyDevice() = default;
-        [[nodiscard]] virtual VkSemaphore GetSemaphore() const = 0;
-        [[nodiscard]] virtual NvBool GetLowLatencyMode() const = 0;
-        [[nodiscard]] virtual VkResult SetLatencySleepMode(std::nullptr_t) = 0;
-        [[nodiscard]] virtual VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) = 0;
-        [[nodiscard]] virtual VkResult LatencySleep(uint64_t value) = 0;
-        virtual void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) = 0;
-        [[nodiscard]] virtual bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) = 0;
-        virtual void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) = 0;
+        NvapiVulkanLowLatencyDevice(LowLatencyDeviceImplementation implementation) : m_implementation(implementation) {}
+        [[nodiscard]] LowLatencyDeviceImplementation GetImplementation() const { return m_implementation; }
+
+      private:
+        LowLatencyDeviceImplementation m_implementation;
     };
 
     class NvapiVulkanLowLatencyDeviceFactory {
@@ -48,16 +49,15 @@ namespace dxvk {
             PFN_PARAM(vkQueueNotifyOutOfBandNV));
 #undef PFN_PARAM
 
-        [[nodiscard]] VkSemaphore GetSemaphore() const override;
-        [[nodiscard]] NvBool GetLowLatencyMode() const override;
-        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t) override;
-        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) override;
-        [[nodiscard]] VkResult LatencySleep(uint64_t value) override;
-        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) override;
-        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) override;
-        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) override;
-
-        ~NvapiVulkanLowLatency2LayerDevice() override;
+        [[nodiscard]] VkSemaphore GetSemaphore() const;
+        [[nodiscard]] NvBool GetLowLatencyMode() const;
+        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t);
+        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs);
+        [[nodiscard]] VkResult LatencySleep(uint64_t value);
+        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports);
+        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker);
+        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType);
+        void Destroy() const;
 
       private:
         VkDevice m_device{};
@@ -87,16 +87,15 @@ namespace dxvk {
             PFN_PARAM(vkSignalSemaphore));
 #undef PFN_PARAM
 
-        [[nodiscard]] VkSemaphore GetSemaphore() const override;
-        [[nodiscard]] NvBool GetLowLatencyMode() const override;
-        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t) override;
-        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) override;
-        [[nodiscard]] VkResult LatencySleep(uint64_t value) override;
-        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) override;
-        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) override;
-        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) override;
-
-        ~NvapiVulkanLowLatencyFakeDevice() override;
+        [[nodiscard]] VkSemaphore GetSemaphore() const;
+        [[nodiscard]] NvBool GetLowLatencyMode() const;
+        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t);
+        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs);
+        [[nodiscard]] VkResult LatencySleep(uint64_t value);
+        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports);
+        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker);
+        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType);
+        void Destroy() const;
 
       private:
         VkDevice m_device{};

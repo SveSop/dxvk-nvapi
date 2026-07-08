@@ -39,7 +39,16 @@ NVAPI_FUNCTION NvAPI_Vulkan_InitLowLatencyDevice(HANDLE vkDevice, HANDLE* signal
         }
     }
 
-    *semaphore = lowLatencyDevice->GetSemaphore();
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            *semaphore = static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->GetSemaphore();
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            *semaphore = static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->GetSemaphore();
+            break;
+        default:
+            return NoImplementation(n);
+    }
 
     return Ok(n);
 }
@@ -83,7 +92,16 @@ NVAPI_FUNCTION NvAPI_Vulkan_GetSleepStatus(HANDLE vkDevice, NV_VULKAN_GET_SLEEP_
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
 
-    pGetSleepStatusParams->bLowLatencyMode = lowLatencyDevice->GetLowLatencyMode();
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            pGetSleepStatusParams->bLowLatencyMode = static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->GetLowLatencyMode();
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            pGetSleepStatusParams->bLowLatencyMode = static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->GetLowLatencyMode();
+            break;
+        default:
+            return NoImplementation(n);
+    }
 
     return Ok(n, alreadyLoggedOk);
 }
@@ -109,9 +127,21 @@ NVAPI_FUNCTION NvAPI_Vulkan_SetSleepMode(HANDLE vkDevice, NV_VULKAN_SET_SLEEP_MO
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
 
-    auto vr = pSetSleepModeParams
-        ? lowLatencyDevice->SetLatencySleepMode(pSetSleepModeParams->bLowLatencyMode, pSetSleepModeParams->bLowLatencyBoost, pSetSleepModeParams->minimumIntervalUs)
-        : lowLatencyDevice->SetLatencySleepMode(nullptr);
+    VkResult vr;
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            vr = pSetSleepModeParams
+                ? static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->SetLatencySleepMode(pSetSleepModeParams->bLowLatencyMode, pSetSleepModeParams->bLowLatencyBoost, pSetSleepModeParams->minimumIntervalUs)
+                : static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->SetLatencySleepMode(nullptr);
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            vr = pSetSleepModeParams
+                ? static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->SetLatencySleepMode(pSetSleepModeParams->bLowLatencyMode, pSetSleepModeParams->bLowLatencyBoost, pSetSleepModeParams->minimumIntervalUs)
+                : static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->SetLatencySleepMode(nullptr);
+            break;
+        default:
+            return NoImplementation(n);
+    }
 
     return vr == VK_SUCCESS ? Ok(n, alreadyLoggedOk) : Error(n, vr);
 }
@@ -134,7 +164,17 @@ NVAPI_FUNCTION NvAPI_Vulkan_Sleep(HANDLE vkDevice, NvU64 signalValue) {
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
 
-    auto vr = lowLatencyDevice->LatencySleep(signalValue);
+    VkResult vr;
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            vr = static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->LatencySleep(signalValue);
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            vr = static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->LatencySleep(signalValue);
+            break;
+        default:
+            return NoImplementation(n);
+    }
 
     return vr == VK_SUCCESS ? Ok(n, alreadyLoggedOk) : Error(n, vr);
 }
@@ -166,7 +206,16 @@ NVAPI_FUNCTION NvAPI_Vulkan_GetLatency(HANDLE vkDevice, NV_VULKAN_LATENCY_RESULT
     static constexpr auto count = sizeof(pGetLatencyParams->frameReport) / sizeof(*pGetLatencyParams->frameReport);
     static_assert(count == 64);
 
-    lowLatencyDevice->GetLatencyTimings(pGetLatencyParams->frameReport);
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->GetLatencyTimings(pGetLatencyParams->frameReport);
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->GetLatencyTimings(pGetLatencyParams->frameReport);
+            break;
+        default:
+            return NoImplementation(n);
+    }
 
     return Ok(n, alreadyLoggedOk);
 }
@@ -197,7 +246,19 @@ NVAPI_FUNCTION NvAPI_Vulkan_SetLatencyMarker(HANDLE vkDevice, NV_VULKAN_LATENCY_
 
     auto markerType = pSetLatencyMarkerParams->markerType;
 
-    if (!lowLatencyDevice->SetLatencyMarker(pSetLatencyMarkerParams->frameID, markerType)) {
+    bool r;
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            r = static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->SetLatencyMarker(pSetLatencyMarkerParams->frameID, markerType);
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            r = static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->SetLatencyMarker(pSetLatencyMarkerParams->frameID, markerType);
+            break;
+        default:
+            return NoImplementation(n);
+    }
+
+    if (!r) {
         thread_local std::unordered_set<NV_VULKAN_LATENCY_MARKER_TYPE> unsupportedMarkerTypes{};
 
         if (auto [it, inserted] = unsupportedMarkerTypes.insert(markerType); inserted)
@@ -224,7 +285,16 @@ NVAPI_FUNCTION NvAPI_Vulkan_NotifyOutOfBandVkQueue(HANDLE vkDevice, HANDLE queue
     if (!lowLatencyDevice)
         return HandleInvalidated(n);
 
-    lowLatencyDevice->QueueNotifyOutOfBand(queue, queueType);
+    switch (lowLatencyDevice->GetImplementation()) {
+        case LowLatencyDeviceImplementation::LowLatency2:
+            static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice)->QueueNotifyOutOfBand(queue, queueType);
+            break;
+        case LowLatencyDeviceImplementation::VkReflexFake:
+            static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice)->QueueNotifyOutOfBand(queue, queueType);
+            break;
+        default:
+            return NoImplementation(n);
+    }
 
     return Ok(n);
 }

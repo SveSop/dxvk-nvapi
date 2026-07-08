@@ -77,7 +77,17 @@ namespace dxvk {
             return false;
 
         auto lowLatencyDevice = std::move(node.mapped());
-        // the destructor will take care of semaphore cleanup
+
+        switch (lowLatencyDevice->GetImplementation()) {
+            case LowLatencyDeviceImplementation::LowLatency2:
+                static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice.get())->Destroy();
+                break;
+            case LowLatencyDeviceImplementation::VkReflexFake:
+                static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice.get())->Destroy();
+                break;
+            default:
+                return false;
+        }
 
         return true;
     }
@@ -163,7 +173,8 @@ namespace dxvk {
         PFN_PARAM(vkGetLatencyTimingsNV),
         PFN_PARAM(vkSetLatencyMarkerNV),
         PFN_PARAM(vkQueueNotifyOutOfBandNV))
-        : m_device(device),
+        : NvapiVulkanLowLatencyDevice(LowLatencyDeviceImplementation::LowLatency2),
+          m_device(device),
           m_semaphore(semaphore),
           m_vkDestroySemaphore(vkDestroySemaphore),
           PFN_INIT(vkSetLatencySleepModeNV),
@@ -317,7 +328,7 @@ namespace dxvk {
         m_vkQueueNotifyOutOfBandNV(queue, &info);
     }
 
-    NvapiVulkanLowLatency2LayerDevice::~NvapiVulkanLowLatency2LayerDevice() {
+    void NvapiVulkanLowLatency2LayerDevice::Destroy() const {
         m_vkDestroySemaphore(m_device, m_semaphore, nullptr);
     }
 
@@ -371,7 +382,8 @@ namespace dxvk {
         VkSemaphore semaphore,
         PFN_PARAM(vkDestroySemaphore),
         PFN_PARAM(vkSignalSemaphore))
-        : m_device(device),
+        : NvapiVulkanLowLatencyDevice(LowLatencyDeviceImplementation::VkReflexFake),
+          m_device(device),
           m_semaphore(semaphore),
           m_vkDestroySemaphore(vkDestroySemaphore),
           PFN_INIT(vkSignalSemaphore) {}
@@ -412,7 +424,7 @@ namespace dxvk {
 
     void NvapiVulkanLowLatencyFakeDevice::QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) {}
 
-    NvapiVulkanLowLatencyFakeDevice::~NvapiVulkanLowLatencyFakeDevice() {
+    void NvapiVulkanLowLatencyFakeDevice::Destroy() const {
         m_vkDestroySemaphore(m_device, m_semaphore, nullptr);
     }
 }
