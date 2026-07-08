@@ -3,11 +3,11 @@
 #include "../util/util_log.h"
 
 namespace dxvk {
-    std::unique_ptr<Vk> NvapiVulkanLowLatencyDevice::m_vk = nullptr;
-    std::unordered_map<VkDevice, std::unique_ptr<NvapiVulkanLowLatencyDevice>> NvapiVulkanLowLatencyDevice::m_nvapiDeviceMap = {};
-    std::mutex NvapiVulkanLowLatencyDevice::m_mutex = {};
+    std::unique_ptr<Vk> NvapiVulkanLowLatencyDeviceFactory::m_vk = nullptr;
+    std::unordered_map<VkDevice, std::unique_ptr<NvapiVulkanLowLatencyDevice>> NvapiVulkanLowLatencyDeviceFactory::m_nvapiDeviceMap = {};
+    std::mutex NvapiVulkanLowLatencyDeviceFactory::m_mutex = {};
 
-    bool NvapiVulkanLowLatencyDevice::Initialize(NvapiResourceFactory& resourceFactory) {
+    bool NvapiVulkanLowLatencyDeviceFactory::Initialize(NvapiResourceFactory& resourceFactory) {
         std::scoped_lock lock{m_mutex};
 
         if (m_vk && m_vk->IsAvailable())
@@ -23,14 +23,14 @@ namespace dxvk {
         return m_vk && m_vk->IsAvailable();
     }
 
-    void NvapiVulkanLowLatencyDevice::Reset() {
+    void NvapiVulkanLowLatencyDeviceFactory::Reset() {
         std::scoped_lock lock{m_mutex};
 
         m_nvapiDeviceMap.clear();
         m_vk.reset();
     }
 
-    std::pair<NvapiVulkanLowLatencyDevice*, VkResult> NvapiVulkanLowLatencyDevice::GetOrCreate(VkDevice device) {
+    std::pair<NvapiVulkanLowLatencyDevice*, VkResult> NvapiVulkanLowLatencyDeviceFactory::GetOrCreate(VkDevice device) {
         std::scoped_lock lock{m_mutex};
 
         if (auto lowLatencyDevice = Get(device))
@@ -44,10 +44,10 @@ namespace dxvk {
         std::unique_ptr<NvapiVulkanLowLatencyDevice> lowLatencyDevice;
         VkResult vr;
 
-        std::tie(lowLatencyDevice, vr) = NvapiVulkanLowLatency2LayerDevice::TryCreate(device);
+        std::tie(lowLatencyDevice, vr) = NvapiVulkanLowLatency2LayerDevice::TryCreate(m_vk.get(), device);
 
         if (!lowLatencyDevice || vr != VK_SUCCESS)
-            std::tie(lowLatencyDevice, vr) = NvapiVulkanLowLatencyFakeDevice::TryCreate(device);
+            std::tie(lowLatencyDevice, vr) = NvapiVulkanLowLatencyFakeDevice::TryCreate(m_vk.get(), device);
 
         if (!lowLatencyDevice || vr != VK_SUCCESS)
             return {nullptr, vr};
@@ -63,12 +63,12 @@ namespace dxvk {
         return {it->second.get(), vr};
     }
 
-    NvapiVulkanLowLatencyDevice* NvapiVulkanLowLatencyDevice::Get(VkDevice device) {
+    NvapiVulkanLowLatencyDevice* NvapiVulkanLowLatencyDeviceFactory::Get(VkDevice device) {
         auto it = m_nvapiDeviceMap.find(device);
         return it == m_nvapiDeviceMap.end() ? nullptr : it->second.get();
     }
 
-    bool NvapiVulkanLowLatencyDevice::Destroy(VkDevice device) {
+    bool NvapiVulkanLowLatencyDeviceFactory::Destroy(VkDevice device) {
         std::scoped_lock lock{m_mutex};
 
         auto node = m_nvapiDeviceMap.extract(device);
@@ -84,19 +84,8 @@ namespace dxvk {
 
 #define PFN_PARAM(proc) PFN_##proc proc
 #define PFN_INIT(proc) m_##proc(proc)
-    NvapiVulkanLowLatencyDevice::NvapiVulkanLowLatencyDevice(
-        VkDevice device,
-        VkSemaphore semaphore,
-        PFN_PARAM(vkDestroySemaphore))
-        : m_device(device),
-          m_semaphore(semaphore),
-          PFN_INIT(vkDestroySemaphore) {}
 
-    VkSemaphore NvapiVulkanLowLatencyDevice::GetSemaphore() const {
-        return m_semaphore;
-    }
-
-    std::pair<VkSemaphore, VkResult> NvapiVulkanLowLatencyDevice::CreateVkSemaphore(VkDevice device, PFN_PARAM(vkCreateSemaphore)) {
+    std::pair<VkSemaphore, VkResult> CreateVkSemaphore(VkDevice device, PFN_PARAM(vkCreateSemaphore)) {
         auto semaphoreTypeCreateInfo = VkSemaphoreTypeCreateInfo{
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
             .pNext = nullptr,
@@ -116,31 +105,11 @@ namespace dxvk {
         return {semaphore, vr};
     }
 
-    NvapiVulkanLowLatencyDevice::~NvapiVulkanLowLatencyDevice() {
-        m_vkDestroySemaphore(m_device, m_semaphore, nullptr);
-    }
-
-#define VK_GET_DEVICE_PROC_ADDR(proc) auto proc = reinterpret_cast<PFN_##proc>(m_vk->GetDeviceProcAddr(device, #proc))
+#define VK_GET_DEVICE_PROC_ADDR(proc) auto proc = reinterpret_cast<PFN_##proc>(vk->GetDeviceProcAddr(device, #proc))
 
     // NvapiVulkanLowLatency2LayerDevice
 
-    NvapiVulkanLowLatency2LayerDevice::NvapiVulkanLowLatency2LayerDevice(
-        VkDevice device,
-        VkSemaphore semaphore,
-        PFN_PARAM(vkDestroySemaphore),
-        PFN_PARAM(vkSetLatencySleepModeNV),
-        PFN_PARAM(vkLatencySleepNV),
-        PFN_PARAM(vkGetLatencyTimingsNV),
-        PFN_PARAM(vkSetLatencyMarkerNV),
-        PFN_PARAM(vkQueueNotifyOutOfBandNV))
-        : NvapiVulkanLowLatencyDevice(device, semaphore, vkDestroySemaphore),
-          PFN_INIT(vkSetLatencySleepModeNV),
-          PFN_INIT(vkLatencySleepNV),
-          PFN_INIT(vkGetLatencyTimingsNV),
-          PFN_INIT(vkSetLatencyMarkerNV),
-          PFN_INIT(vkQueueNotifyOutOfBandNV) {}
-
-    std::pair<std::unique_ptr<NvapiVulkanLowLatency2LayerDevice>, VkResult> NvapiVulkanLowLatency2LayerDevice::TryCreate(VkDevice device) {
+    std::pair<std::unique_ptr<NvapiVulkanLowLatency2LayerDevice>, VkResult> NvapiVulkanLowLatency2LayerDevice::TryCreate(Vk* vk, VkDevice device) {
         VK_GET_DEVICE_PROC_ADDR(vkCreateSemaphore);
         VK_GET_DEVICE_PROC_ADDR(vkDestroySemaphore);
 
@@ -183,6 +152,28 @@ namespace dxvk {
 
         log::info("Successfully initialized Vulkan Low-Latency with VkNvLowLatency2 implementation, DXVK-NVAPI's Vulkan layer is present");
         return {std::move(lowLatencyDevice), VK_SUCCESS};
+    }
+
+    NvapiVulkanLowLatency2LayerDevice::NvapiVulkanLowLatency2LayerDevice(
+        VkDevice device,
+        VkSemaphore semaphore,
+        PFN_PARAM(vkDestroySemaphore),
+        PFN_PARAM(vkSetLatencySleepModeNV),
+        PFN_PARAM(vkLatencySleepNV),
+        PFN_PARAM(vkGetLatencyTimingsNV),
+        PFN_PARAM(vkSetLatencyMarkerNV),
+        PFN_PARAM(vkQueueNotifyOutOfBandNV))
+        : m_device(device),
+          m_semaphore(semaphore),
+          m_vkDestroySemaphore(vkDestroySemaphore),
+          PFN_INIT(vkSetLatencySleepModeNV),
+          PFN_INIT(vkLatencySleepNV),
+          PFN_INIT(vkGetLatencyTimingsNV),
+          PFN_INIT(vkSetLatencyMarkerNV),
+          PFN_INIT(vkQueueNotifyOutOfBandNV) {}
+
+    VkSemaphore NvapiVulkanLowLatency2LayerDevice::GetSemaphore() const {
+        return m_semaphore;
     }
 
     NvBool NvapiVulkanLowLatency2LayerDevice::GetLowLatencyMode() const {
@@ -326,17 +317,13 @@ namespace dxvk {
         m_vkQueueNotifyOutOfBandNV(queue, &info);
     }
 
+    NvapiVulkanLowLatency2LayerDevice::~NvapiVulkanLowLatency2LayerDevice() {
+        m_vkDestroySemaphore(m_device, m_semaphore, nullptr);
+    }
+
     // NvapiVulkanLowLatencyFakeDevice
 
-    NvapiVulkanLowLatencyFakeDevice::NvapiVulkanLowLatencyFakeDevice(
-        VkDevice device,
-        VkSemaphore semaphore,
-        PFN_PARAM(vkDestroySemaphore),
-        PFN_PARAM(vkSignalSemaphore))
-        : NvapiVulkanLowLatencyDevice(device, semaphore, vkDestroySemaphore),
-          PFN_INIT(vkSignalSemaphore) {}
-
-    std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> NvapiVulkanLowLatencyFakeDevice::TryCreate(VkDevice device) {
+    std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> NvapiVulkanLowLatencyFakeDevice::TryCreate(Vk* vk, VkDevice device) {
         VK_GET_DEVICE_PROC_ADDR(vkCreateSemaphore);
         VK_GET_DEVICE_PROC_ADDR(vkDestroySemaphore);
 
@@ -356,7 +343,7 @@ namespace dxvk {
         // We'll use whichever is available
         VK_GET_DEVICE_PROC_ADDR(vkSignalSemaphore);
 
-        if (!(vkSignalSemaphore || (vkSignalSemaphore = reinterpret_cast<PFN_vkSignalSemaphoreKHR>(m_vk->GetDeviceProcAddr(device, "vkSignalSemaphoreKHR"))))) {
+        if (!(vkSignalSemaphore || (vkSignalSemaphore = reinterpret_cast<PFN_vkSignalSemaphoreKHR>(vk->GetDeviceProcAddr(device, "vkSignalSemaphoreKHR"))))) {
             log::info("Initializing Vulkan Low-Latency with VkFakeReflex implementation failed: could not find vkSignalSemaphore commands in VkDevice's dispatch table");
             return {nullptr, VK_ERROR_EXTENSION_NOT_PRESENT};
         }
@@ -377,6 +364,20 @@ namespace dxvk {
 
         log::info("Successfully initialized Vulkan Low-Latency with VkFakeReflex implementation: faking success as a workaround but latency will not be reduced");
         return {std::move(lowLatencyDevice), VK_SUCCESS};
+    }
+
+    NvapiVulkanLowLatencyFakeDevice::NvapiVulkanLowLatencyFakeDevice(
+        VkDevice device,
+        VkSemaphore semaphore,
+        PFN_PARAM(vkDestroySemaphore),
+        PFN_PARAM(vkSignalSemaphore))
+        : m_device(device),
+          m_semaphore(semaphore),
+          m_vkDestroySemaphore(vkDestroySemaphore),
+          PFN_INIT(vkSignalSemaphore) {}
+
+    VkSemaphore NvapiVulkanLowLatencyFakeDevice::GetSemaphore() const {
+        return m_semaphore;
     }
 
     NvBool NvapiVulkanLowLatencyFakeDevice::GetLowLatencyMode() const {
@@ -410,4 +411,8 @@ namespace dxvk {
     }
 
     void NvapiVulkanLowLatencyFakeDevice::QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) {}
+
+    NvapiVulkanLowLatencyFakeDevice::~NvapiVulkanLowLatencyFakeDevice() {
+        m_vkDestroySemaphore(m_device, m_semaphore, nullptr);
+    }
 }

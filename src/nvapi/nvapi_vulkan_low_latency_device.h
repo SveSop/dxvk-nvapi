@@ -5,7 +5,19 @@
 
 namespace dxvk {
 
-    class NvapiVulkanLowLatencyDevice {
+    struct NvapiVulkanLowLatencyDevice {
+        virtual ~NvapiVulkanLowLatencyDevice() = default;
+        [[nodiscard]] virtual VkSemaphore GetSemaphore() const = 0;
+        [[nodiscard]] virtual NvBool GetLowLatencyMode() const = 0;
+        [[nodiscard]] virtual VkResult SetLatencySleepMode(std::nullptr_t) = 0;
+        [[nodiscard]] virtual VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) = 0;
+        [[nodiscard]] virtual VkResult LatencySleep(uint64_t value) = 0;
+        virtual void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) = 0;
+        [[nodiscard]] virtual bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) = 0;
+        virtual void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) = 0;
+    };
+
+    class NvapiVulkanLowLatencyDeviceFactory {
       public:
         static bool Initialize(NvapiResourceFactory& resourceFactory);
         static void Reset();
@@ -14,42 +26,16 @@ namespace dxvk {
         [[nodiscard]] static NvapiVulkanLowLatencyDevice* Get(VkDevice device);
         static bool Destroy(VkDevice device);
 
-        // Prevent default construction and copy semantics.
-        NvapiVulkanLowLatencyDevice() = delete;
-        NvapiVulkanLowLatencyDevice(const NvapiVulkanLowLatencyDevice&) = delete;
-        NvapiVulkanLowLatencyDevice& operator=(const NvapiVulkanLowLatencyDevice&) = delete;
-
-        [[nodiscard]] VkSemaphore GetSemaphore() const;
-
-        [[nodiscard]] virtual NvBool GetLowLatencyMode() const = 0;
-        [[nodiscard]] virtual VkResult SetLatencySleepMode(std::nullptr_t) = 0;
-        [[nodiscard]] virtual VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) = 0;
-        [[nodiscard]] virtual VkResult LatencySleep(uint64_t value) = 0;
-        virtual void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) = 0;
-        [[nodiscard]] virtual bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) = 0;
-        virtual void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) = 0;
-
-        virtual ~NvapiVulkanLowLatencyDevice();
-
-      protected:
-        [[nodiscard]] static std::pair<VkSemaphore, VkResult> CreateVkSemaphore(VkDevice device, PFN_vkCreateSemaphore vkCreateSemaphore);
-        [[nodiscard]] explicit NvapiVulkanLowLatencyDevice(
-            VkDevice device,
-            VkSemaphore semaphore,
-            PFN_vkDestroySemaphore vkDestroySemaphore);
-
-        VkDevice m_device{};
-        VkSemaphore m_semaphore{};
-        PFN_vkDestroySemaphore m_vkDestroySemaphore{};
-        static std::unique_ptr<Vk> m_vk;
-
       private:
+        static std::unique_ptr<Vk> m_vk;
         static std::unordered_map<VkDevice, std::unique_ptr<NvapiVulkanLowLatencyDevice>> m_nvapiDeviceMap;
         static std::mutex m_mutex;
     };
 
     class NvapiVulkanLowLatency2LayerDevice final : public NvapiVulkanLowLatencyDevice {
       public:
+        [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatency2LayerDevice>, VkResult> TryCreate(Vk* vk, VkDevice device);
+
 #define PFN_PARAM(proc) PFN_##proc proc
         [[nodiscard]] explicit NvapiVulkanLowLatency2LayerDevice(
             VkDevice device,
@@ -61,8 +47,8 @@ namespace dxvk {
             PFN_PARAM(vkSetLatencyMarkerNV),
             PFN_PARAM(vkQueueNotifyOutOfBandNV));
 #undef PFN_PARAM
-        [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatency2LayerDevice>, VkResult> TryCreate(VkDevice device);
 
+        [[nodiscard]] VkSemaphore GetSemaphore() const override;
         [[nodiscard]] NvBool GetLowLatencyMode() const override;
         [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t) override;
         [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) override;
@@ -71,7 +57,13 @@ namespace dxvk {
         [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) override;
         void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) override;
 
+        ~NvapiVulkanLowLatency2LayerDevice() override;
+
       private:
+        VkDevice m_device{};
+        VkSemaphore m_semaphore{};
+        PFN_vkDestroySemaphore m_vkDestroySemaphore{};
+
         bool m_lowLatencyMode{};
 #define PFN_MEMBER(proc) \
     PFN_##proc m_##proc {}
@@ -85,15 +77,17 @@ namespace dxvk {
 
     class NvapiVulkanLowLatencyFakeDevice final : public NvapiVulkanLowLatencyDevice {
       public:
+        [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> TryCreate(Vk* vk, VkDevice device);
+
 #define PFN_PARAM(proc) PFN_##proc proc
         [[nodiscard]] explicit NvapiVulkanLowLatencyFakeDevice(
             VkDevice device,
             VkSemaphore semaphore,
             PFN_PARAM(vkDestroySemaphore),
             PFN_PARAM(vkSignalSemaphore));
-        [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> TryCreate(VkDevice device);
 #undef PFN_PARAM
 
+        [[nodiscard]] VkSemaphore GetSemaphore() const override;
         [[nodiscard]] NvBool GetLowLatencyMode() const override;
         [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t) override;
         [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) override;
@@ -102,7 +96,13 @@ namespace dxvk {
         [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) override;
         void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) override;
 
+        ~NvapiVulkanLowLatencyFakeDevice() override;
+
       private:
+        VkDevice m_device{};
+        VkSemaphore m_semaphore{};
+        PFN_vkDestroySemaphore m_vkDestroySemaphore{};
+
         PFN_vkSignalSemaphore m_vkSignalSemaphore{};
     };
 }

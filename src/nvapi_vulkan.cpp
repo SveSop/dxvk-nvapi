@@ -14,7 +14,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_InitLowLatencyDevice(HANDLE vkDevice, HANDLE* signal
     if (!resourceFactory)
         return ApiNotInitialized(n);
 
-    NvapiVulkanLowLatencyDevice::Initialize(*resourceFactory);
+    NvapiVulkanLowLatencyDeviceFactory::Initialize(*resourceFactory);
 
     auto device = static_cast<VkDevice>(vkDevice);
     auto semaphore = reinterpret_cast<VkSemaphore*>(signalSemaphoreHandle);
@@ -25,7 +25,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_InitLowLatencyDevice(HANDLE vkDevice, HANDLE* signal
     if (!semaphore)
         return InvalidPointer(n);
 
-    auto [lowLatencyDevice, vr] = NvapiVulkanLowLatencyDevice::GetOrCreate(device);
+    auto [lowLatencyDevice, vr] = NvapiVulkanLowLatencyDeviceFactory::GetOrCreate(device);
 
     if (!lowLatencyDevice) {
         switch (vr) {
@@ -55,7 +55,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_DestroyLowLatencyDevice(HANDLE vkDevice) {
     if (!device)
         return InvalidArgument(n);
 
-    return NvapiVulkanLowLatencyDevice::Destroy(device) ? Ok(n) : HandleInvalidated(n);
+    return NvapiVulkanLowLatencyDeviceFactory::Destroy(device) ? Ok(n) : HandleInvalidated(n);
 }
 
 NVAPI_FUNCTION NvAPI_Vulkan_GetSleepStatus(HANDLE vkDevice, NV_VULKAN_GET_SLEEP_STATUS_PARAMS* pGetSleepStatusParams) {
@@ -77,7 +77,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_GetSleepStatus(HANDLE vkDevice, NV_VULKAN_GET_SLEEP_
     if (pGetSleepStatusParams->version != NV_VULKAN_GET_SLEEP_STATUS_PARAMS_VER1)
         return IncompatibleStructVersion(n, pGetSleepStatusParams->version);
 
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDevice::Get(device);
+    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
 
     // TODO: check native behavior for this case
     if (!lowLatencyDevice)
@@ -104,7 +104,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_SetSleepMode(HANDLE vkDevice, NV_VULKAN_SET_SLEEP_MO
     if (pSetSleepModeParams && pSetSleepModeParams->version != NV_VULKAN_SET_SLEEP_MODE_PARAMS_VER1)
         return IncompatibleStructVersion(n, pSetSleepModeParams->version);
 
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDevice::Get(device);
+    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
 
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
@@ -129,7 +129,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_Sleep(HANDLE vkDevice, NvU64 signalValue) {
     if (!device)
         return InvalidArgument(n);
 
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDevice::Get(device);
+    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
 
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
@@ -158,7 +158,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_GetLatency(HANDLE vkDevice, NV_VULKAN_LATENCY_RESULT
     if (pGetLatencyParams->version != NV_VULKAN_LATENCY_RESULT_PARAMS_VER1)
         return IncompatibleStructVersion(n, pGetLatencyParams->version);
 
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDevice::Get(device);
+    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
 
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
@@ -190,7 +190,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_SetLatencyMarker(HANDLE vkDevice, NV_VULKAN_LATENCY_
     if (pSetLatencyMarkerParams->version != NV_VULKAN_LATENCY_MARKER_PARAMS_VER1)
         return IncompatibleStructVersion(n, pSetLatencyMarkerParams->version);
 
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDevice::Get(device);
+    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
 
     if (!lowLatencyDevice)
         return HandleInvalidated(n, alreadyLoggedHandleInvalidated);
@@ -219,7 +219,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_NotifyOutOfBandVkQueue(HANDLE vkDevice, HANDLE queue
     if (!device || !queue)
         return InvalidArgument(n);
 
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDevice::Get(device);
+    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
 
     if (!lowLatencyDevice)
         return HandleInvalidated(n);

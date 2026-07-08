@@ -25,7 +25,7 @@ class SectionListener : public Catch::EventListenerBase {
         NvapiD3d12GraphicsCommandList::Reset();
         NvapiD3d12CommandQueue::Reset();
         NvapiD3dLowLatencyDevice::Reset();
-        NvapiVulkanLowLatencyDevice::Reset();
+        NvapiVulkanLowLatencyDeviceFactory::Reset();
 
         if (!resourceFactory)
             return;

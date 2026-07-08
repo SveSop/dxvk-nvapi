@@ -14,7 +14,7 @@ namespace dxvk {
         NvapiD3d11Device::Reset();
         NvapiD3d12Device::Reset();
         NvapiD3dLowLatencyDevice::Reset();
-        NvapiVulkanLowLatencyDevice::Reset();
+        NvapiVulkanLowLatencyDeviceFactory::Reset();
 
         for (const auto output : m_nvapiOutputs)
             delete output;
