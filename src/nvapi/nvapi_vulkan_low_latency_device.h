@@ -48,29 +48,6 @@ namespace dxvk {
         static std::mutex m_mutex;
     };
 
-    class NvapiVulkanLowLatencyFakeDevice final : public NvapiVulkanLowLatencyDevice {
-      public:
-#define PFN_PARAM(proc) PFN_##proc proc
-        [[nodiscard]] explicit NvapiVulkanLowLatencyFakeDevice(
-            VkDevice device,
-            VkSemaphore semaphore,
-            PFN_PARAM(vkDestroySemaphore),
-            PFN_PARAM(vkSignalSemaphore));
-        [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> TryCreate(VkDevice device);
-#undef PFN_PARAM
-
-        [[nodiscard]] NvBool GetLowLatencyMode() const override;
-        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t) override;
-        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) override;
-        [[nodiscard]] VkResult LatencySleep(uint64_t value) override;
-        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) override;
-        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) override;
-        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) override;
-
-      private:
-        PFN_vkSignalSemaphore m_vkSignalSemaphore{};
-    };
-
     class NvapiVulkanLowLatency2LayerDevice final : public NvapiVulkanLowLatencyDevice {
       public:
 #define PFN_PARAM(proc) PFN_##proc proc
@@ -104,5 +81,28 @@ namespace dxvk {
         PFN_MEMBER(vkSetLatencyMarkerNV);
         PFN_MEMBER(vkQueueNotifyOutOfBandNV);
 #undef PFN_MEMBER
+    };
+
+    class NvapiVulkanLowLatencyFakeDevice final : public NvapiVulkanLowLatencyDevice {
+      public:
+#define PFN_PARAM(proc) PFN_##proc proc
+        [[nodiscard]] explicit NvapiVulkanLowLatencyFakeDevice(
+            VkDevice device,
+            VkSemaphore semaphore,
+            PFN_PARAM(vkDestroySemaphore),
+            PFN_PARAM(vkSignalSemaphore));
+        [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> TryCreate(VkDevice device);
+#undef PFN_PARAM
+
+        [[nodiscard]] NvBool GetLowLatencyMode() const override;
+        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t) override;
+        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) override;
+        [[nodiscard]] VkResult LatencySleep(uint64_t value) override;
+        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) override;
+        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) override;
+        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) override;
+
+      private:
+        PFN_vkSignalSemaphore m_vkSignalSemaphore{};
     };
 }
