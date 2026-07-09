@@ -78,17 +78,6 @@ namespace dxvk {
 
         auto lowLatencyDevice = std::move(node.mapped());
 
-        switch (lowLatencyDevice->GetImplementation()) {
-            case LowLatencyDeviceImplementation::LowLatency2:
-                static_cast<NvapiVulkanLowLatency2LayerDevice*>(lowLatencyDevice.get())->Destroy();
-                break;
-            case LowLatencyDeviceImplementation::VkReflexFake:
-                static_cast<NvapiVulkanLowLatencyFakeDevice*>(lowLatencyDevice.get())->Destroy();
-                break;
-            default:
-                return false;
-        }
-
         return true;
     }
 
