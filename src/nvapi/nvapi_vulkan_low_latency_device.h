@@ -36,21 +36,6 @@ namespace dxvk {
         PFN_vkDestroySemaphore m_vkDestroySemaphore;
     };
 
-    class NvapiVulkanLowLatencyDeviceFactory {
-      public:
-        static bool Initialize(NvapiResourceFactory& resourceFactory);
-        static void Reset();
-
-        [[nodiscard]] static std::pair<NvapiVulkanLowLatencyDevice*, VkResult> GetOrCreate(VkDevice device);
-        [[nodiscard]] static NvapiVulkanLowLatencyDevice* Get(VkDevice device);
-        static bool Destroy(VkDevice device);
-
-      private:
-        static std::unique_ptr<Vk> m_vk;
-        static std::unordered_map<VkDevice, std::unique_ptr<NvapiVulkanLowLatencyDevice>> m_nvapiDeviceMap;
-        static std::mutex m_mutex;
-    };
-
     class NvapiVulkanLowLatency2LayerDevice final : public NvapiVulkanLowLatencyDevice {
       public:
         [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatency2LayerDevice>, VkResult> TryCreate(Vk* vk, VkDevice device);

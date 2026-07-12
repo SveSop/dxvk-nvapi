@@ -10,6 +10,7 @@ nvapi_src = files([
   '../src/nvapi/nvapi_as_convert.cpp',
   '../src/nvapi/nvapi_resource_factory.cpp',
   '../src/nvapi/nvapi_d3d_low_latency_device.cpp',
+  '../src/nvapi/nvapi_vulkan_low_latency_device_factory.cpp',
   '../src/nvapi/nvapi_vulkan_low_latency_device.cpp',
   '../src/nvapi/nvapi_output.cpp',
   '../src/nvapi/nvapi_adapter.cpp',

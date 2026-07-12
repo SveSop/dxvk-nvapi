@@ -1,5 +1,6 @@
 #include "nvapi_private.h"
 #include "nvapi_globals.h"
+#include "nvapi/nvapi_vulkan_low_latency_device_factory.h"
 #include "nvapi/nvapi_vulkan_low_latency_device.h"
 #include "util/util_statuscode.h"
 

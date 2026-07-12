@@ -6,6 +6,7 @@
 
 #include "../src/nvapi_private.h"
 #include "../src/nvapi_globals.h"
+#include "../src/nvapi/nvapi_vulkan_low_latency_device_factory.h"
 #include "../src/nvapi/nvapi_vulkan_low_latency_device.h"
 #include "../src/nvapi/nvapi_d3d_low_latency_device.h"
 #include "../src/nvapi/nvapi_d3d11_device.h"
