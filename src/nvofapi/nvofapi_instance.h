@@ -31,6 +31,7 @@ namespace dxvk {
     constexpr uint32_t CMDS_IN_FLIGHT = 8;
 
     class NvOFInstance {
+
       public:
         explicit NvOFInstance(ResourceFactory& resourceFactory) : m_resourceFactory(resourceFactory) {};
         NvOFInstance(ResourceFactory& resourceFactory, VkInstance vkInstance, VkPhysicalDevice vkPhysicalDevice, VkDevice vkDevice)
