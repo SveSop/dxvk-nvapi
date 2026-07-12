@@ -4,6 +4,46 @@
 
 namespace dxvk {
 
+#define INVOKE(call)                                                            \
+    switch (m_implementation) {                                                 \
+        case LowLatencyDeviceImplementation::LowLatency2:                       \
+            return static_cast<NvapiVulkanLowLatency2LayerDevice*>(this)->call; \
+        case LowLatencyDeviceImplementation::VkReflexFake:                      \
+            return static_cast<NvapiVulkanLowLatencyFakeDevice*>(this)->call;   \
+        default:                                                                \
+            __builtin_unreachable();                                            \
+    }
+
+    NvBool NvapiVulkanLowLatencyDevice::GetLowLatencyMode(){
+        INVOKE(GetLowLatencyMode()) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+    VkResult NvapiVulkanLowLatencyDevice::SetLatencySleepMode(std::nullptr_t){
+        INVOKE(SetLatencySleepMode(nullptr)) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+    VkResult NvapiVulkanLowLatencyDevice::SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs){
+        INVOKE(SetLatencySleepMode(lowLatencyMode, lowLatencyBoost, minimumIntervalUs)) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+    VkResult NvapiVulkanLowLatencyDevice::LatencySleep(uint64_t value) {
+        INVOKE(LatencySleep(value)) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+    void NvapiVulkanLowLatencyDevice::GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) {
+        INVOKE(GetLatencyTimings(frameReports)) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+    bool NvapiVulkanLowLatencyDevice::SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) {
+        INVOKE(SetLatencyMarker(frameID, marker)) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+    void NvapiVulkanLowLatencyDevice::QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType){
+        INVOKE(QueueNotifyOutOfBand(queue, queueType)) // NOLINT(*-pro-type-static-cast-downcast)
+    }
+
+#undef INVOKE
+
 #define PFN_PARAM(proc) PFN_##proc proc
 #define PFN_INIT(proc) m_##proc(proc)
 
@@ -92,7 +132,7 @@ namespace dxvk {
           PFN_INIT(vkSetLatencyMarkerNV),
           PFN_INIT(vkQueueNotifyOutOfBandNV) {}
 
-    NvBool NvapiVulkanLowLatency2LayerDevice::GetLowLatencyMode() const {
+    NvBool NvapiVulkanLowLatency2LayerDevice::GetLowLatencyMode() {
         return m_lowLatencyMode ? NV_TRUE : NV_FALSE;
     }
 
@@ -286,7 +326,7 @@ namespace dxvk {
         : NvapiVulkanLowLatencyDevice(LowLatencyDeviceImplementation::VkReflexFake, device, semaphore, vkDestroySemaphore),
           PFN_INIT(vkSignalSemaphore) {}
 
-    NvBool NvapiVulkanLowLatencyFakeDevice::GetLowLatencyMode() const {
+    NvBool NvapiVulkanLowLatencyFakeDevice::GetLowLatencyMode() {
         return NV_FALSE;
     }
 

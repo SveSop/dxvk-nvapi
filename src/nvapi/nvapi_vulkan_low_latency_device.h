@@ -3,6 +3,9 @@
 #include "../nvapi_private.h"
 #include "./nvapi_resource_factory.h"
 
+// ReSharper disable CppHiddenFunction
+// ReSharper disable CppHidingFunction
+
 namespace dxvk {
 
     enum class LowLatencyDeviceImplementation : uint8_t {
@@ -25,6 +28,15 @@ namespace dxvk {
 
         [[nodiscard]] LowLatencyDeviceImplementation GetImplementation() const { return m_implementation; }
         [[nodiscard]] VkSemaphore GetSemaphore() const { return m_semaphore; }
+
+        [[nodiscard]] NvBool GetLowLatencyMode();
+        [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t);
+        [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs);
+        [[nodiscard]] VkResult LatencySleep(uint64_t value);
+        void GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports);
+        [[nodiscard]] bool SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker);
+        void QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType);
+
         virtual ~NvapiVulkanLowLatencyDevice() { m_vkDestroySemaphore(m_device, m_semaphore, nullptr); }
 
       protected:
@@ -52,7 +64,7 @@ namespace dxvk {
             PFN_PARAM(vkQueueNotifyOutOfBandNV));
 #undef PFN_PARAM
 
-        [[nodiscard]] NvBool GetLowLatencyMode() const;
+        [[nodiscard]] NvBool GetLowLatencyMode();
         [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t);
         [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs);
         [[nodiscard]] VkResult LatencySleep(uint64_t value);
@@ -84,7 +96,7 @@ namespace dxvk {
             PFN_PARAM(vkSignalSemaphore));
 #undef PFN_PARAM
 
-        [[nodiscard]] NvBool GetLowLatencyMode() const;
+        [[nodiscard]] NvBool GetLowLatencyMode();
         [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t);
         [[nodiscard]] VkResult SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs);
         [[nodiscard]] VkResult LatencySleep(uint64_t value);
