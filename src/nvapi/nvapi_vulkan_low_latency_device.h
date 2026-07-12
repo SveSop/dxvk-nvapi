@@ -7,13 +7,13 @@
 // ReSharper disable CppHidingFunction
 
 namespace dxvk {
-
     enum class LowLatencyDeviceImplementation : uint8_t {
         LowLatency2,
         VkReflexFake
     };
 
     class NvapiVulkanLowLatencyDevice {
+
       public:
 #define PFN_PARAM(proc) PFN_##proc proc
         explicit NvapiVulkanLowLatencyDevice(LowLatencyDeviceImplementation type, VkDevice device, VkSemaphore semaphore, PFN_PARAM(vkDestroySemaphore))
@@ -49,6 +49,7 @@ namespace dxvk {
     };
 
     class NvapiVulkanLowLatency2LayerDevice final : public NvapiVulkanLowLatencyDevice {
+
       public:
         [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatency2LayerDevice>, VkResult> TryCreate(Vk* vk, VkDevice device);
 
@@ -85,6 +86,7 @@ namespace dxvk {
     };
 
     class NvapiVulkanLowLatencyFakeDevice final : public NvapiVulkanLowLatencyDevice {
+
       public:
         [[nodiscard]] static std::pair<std::unique_ptr<NvapiVulkanLowLatencyFakeDevice>, VkResult> TryCreate(Vk* vk, VkDevice device);
 

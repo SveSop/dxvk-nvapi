@@ -6,6 +6,7 @@
 
 namespace dxvk {
     class NvapiD3d12GraphicsCommandList final {
+
       public:
         static void Reset();
         [[nodiscard]] static NvapiD3d12GraphicsCommandList* GetOrCreate(ID3D12GraphicsCommandList* commandList);
@@ -13,14 +14,9 @@ namespace dxvk {
         explicit NvapiD3d12GraphicsCommandList(ID3D12GraphicsCommandListExt* vkd3dCommandList);
 
         [[nodiscard]] HRESULT LaunchCubinShader(NVDX_ObjectHandle shader, NvU32 blockX, NvU32 blockY, NvU32 blockZ, const void* params, NvU32 paramSize) const;
+        [[nodiscard]] bool IsOpacityMicromapSupported() const { return m_supportsOpacityMicromap; }
 
-        bool IsOpacityMicromapSupported() const {
-            return m_supportsOpacityMicromap;
-        }
-
-        NvapiAsConverter& GetAsConverter() {
-            return m_asConverter;
-        }
+        NvapiAsConverter& GetAsConverter() { return m_asConverter; }
 
         [[nodiscard]] bool VerifyOpacityMicromapArrayNVAPI(D3D12_GPU_VIRTUAL_ADDRESS opacity_micromap_array) const;
 

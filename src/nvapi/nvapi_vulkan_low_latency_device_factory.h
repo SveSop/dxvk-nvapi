@@ -5,8 +5,8 @@
 #include "./nvapi_vulkan_low_latency_device.h"
 
 namespace dxvk {
-
     class NvapiVulkanLowLatencyDeviceFactory {
+
       public:
         static bool Initialize(NvapiResourceFactory& resourceFactory);
         static void Reset();

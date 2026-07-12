@@ -8,6 +8,7 @@ namespace dxvk {
         const NVAPI_D3D12_BUILD_RAYTRACING_OPACITY_MICROMAP_ARRAY_INPUTS& nvapiInputs);
 
     class NvapiAsConverter {
+
       public:
         NvapiAsConverter() {
             m_reserved = StackReserve;
