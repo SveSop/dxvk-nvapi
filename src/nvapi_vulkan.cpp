@@ -53,7 +53,7 @@ NVAPI_FUNCTION NvAPI_Vulkan_InitLowLatencyDevice(HANDLE vkDevice, HANDLE* signal
         }
     }
 
-    LOW_LATENCY_DEVICE_INVOKE_RET(*semaphore, lowLatencyDevice, GetSemaphore()); // NOLINT(*-pro-type-static-cast-downcast)
+    *semaphore = lowLatencyDevice->GetSemaphore();
 
     return Ok(n);
 }
@@ -68,12 +68,6 @@ NVAPI_FUNCTION NvAPI_Vulkan_DestroyLowLatencyDevice(HANDLE vkDevice) {
 
     if (!device)
         return InvalidArgument(n);
-
-    auto lowLatencyDevice = NvapiVulkanLowLatencyDeviceFactory::Get(device);
-    if (!lowLatencyDevice)
-        return HandleInvalidated(n);
-
-    LOW_LATENCY_DEVICE_INVOKE(lowLatencyDevice, Destroy()); // NOLINT(*-pro-type-static-cast-downcast)
 
     return NvapiVulkanLowLatencyDeviceFactory::Destroy(device) ? Ok(n) : HandleInvalidated(n);
 }
