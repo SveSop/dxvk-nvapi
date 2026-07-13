@@ -23,7 +23,6 @@ namespace dxvk {
         NvapiVulkanLowLatencyDevice& operator=(const NvapiVulkanLowLatencyDevice&) = delete;
         NvapiVulkanLowLatencyDevice& operator=(NvapiVulkanLowLatencyDevice&&) = delete;
 
-        [[nodiscard]] LowLatencyDeviceImplementation GetImplementation() const { return m_implementation; }
         [[nodiscard]] VkSemaphore GetSemaphore() const { return m_semaphore; }
         [[nodiscard]] NvBool GetLowLatencyMode();
         [[nodiscard]] VkResult SetLatencySleepMode(std::nullptr_t);
