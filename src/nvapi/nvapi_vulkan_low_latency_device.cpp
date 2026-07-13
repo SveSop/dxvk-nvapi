@@ -15,31 +15,31 @@ namespace dxvk {
     }
 
     NvBool NvapiVulkanLowLatencyDevice::GetLowLatencyMode(){
-        INVOKE(GetLowLatencyMode()) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(GetLowLatencyModeImpl()) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
     VkResult NvapiVulkanLowLatencyDevice::SetLatencySleepMode(std::nullptr_t){
-        INVOKE(SetLatencySleepMode(nullptr)) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(SetLatencySleepModeImpl(nullptr)) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
     VkResult NvapiVulkanLowLatencyDevice::SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs){
-        INVOKE(SetLatencySleepMode(lowLatencyMode, lowLatencyBoost, minimumIntervalUs)) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(SetLatencySleepModeImpl(lowLatencyMode, lowLatencyBoost, minimumIntervalUs)) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
     VkResult NvapiVulkanLowLatencyDevice::LatencySleep(uint64_t value) {
-        INVOKE(LatencySleep(value)) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(LatencySleepImpl(value)) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
     void NvapiVulkanLowLatencyDevice::GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) {
-        INVOKE(GetLatencyTimings(frameReports)) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(GetLatencyTimingsImpl(frameReports)) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
     bool NvapiVulkanLowLatencyDevice::SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) {
-        INVOKE(SetLatencyMarker(frameID, marker)) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(SetLatencyMarkerImpl(frameID, marker)) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
     void NvapiVulkanLowLatencyDevice::QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType){
-        INVOKE(QueueNotifyOutOfBand(queue, queueType)) // NOLINT(*-pro-type-static-cast-downcast)
+        INVOKE(QueueNotifyOutOfBandImpl(queue, queueType)) // NOLINT(*-pro-type-static-cast-downcast)
     }
 
 #undef INVOKE
@@ -132,7 +132,7 @@ namespace dxvk {
           PFN_INIT(vkSetLatencyMarkerNV),
           PFN_INIT(vkQueueNotifyOutOfBandNV) {}
 
-    NvBool NvapiVulkanLowLatency2LayerDevice::GetLowLatencyMode() {
+    NvBool NvapiVulkanLowLatency2LayerDevice::GetLowLatencyModeImpl() {
         return m_lowLatencyMode ? NV_TRUE : NV_FALSE;
     }
 
@@ -143,7 +143,7 @@ namespace dxvk {
         return reinterpret_cast<VkSwapchainKHR>(device);
     }
 
-    VkResult NvapiVulkanLowLatency2LayerDevice::SetLatencySleepMode(std::nullptr_t) {
+    VkResult NvapiVulkanLowLatency2LayerDevice::SetLatencySleepModeImpl(std::nullptr_t) {
         auto vr = m_vkSetLatencySleepModeNV(m_device, GetSwapchain(m_device), nullptr);
 
         if (vr == VK_SUCCESS)
@@ -152,7 +152,7 @@ namespace dxvk {
         return vr;
     }
 
-    VkResult NvapiVulkanLowLatency2LayerDevice::SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) {
+    VkResult NvapiVulkanLowLatency2LayerDevice::SetLatencySleepModeImpl(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) {
         auto info = VkLatencySleepModeInfoNV{
             .sType = VK_STRUCTURE_TYPE_LATENCY_SLEEP_MODE_INFO_NV,
             .pNext = nullptr,
@@ -169,7 +169,7 @@ namespace dxvk {
         return vr;
     }
 
-    VkResult NvapiVulkanLowLatency2LayerDevice::LatencySleep(uint64_t value) {
+    VkResult NvapiVulkanLowLatency2LayerDevice::LatencySleepImpl(uint64_t value) {
         auto info = VkLatencySleepInfoNV{
             .sType = VK_STRUCTURE_TYPE_LATENCY_SLEEP_INFO_NV,
             .pNext = nullptr,
@@ -180,7 +180,7 @@ namespace dxvk {
         return m_vkLatencySleepNV(m_device, GetSwapchain(m_device), &info);
     }
 
-    void NvapiVulkanLowLatency2LayerDevice::GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) {
+    void NvapiVulkanLowLatency2LayerDevice::GetLatencyTimingsImpl(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) {
         std::array<VkLatencyTimingsFrameReportNV, 64> latencyTimingsFrameReports;
 
         for (auto& report : latencyTimingsFrameReports) {
@@ -242,7 +242,7 @@ namespace dxvk {
         return VK_LATENCY_MARKER_MAX_ENUM_NV;
     }
 
-    bool NvapiVulkanLowLatency2LayerDevice::SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) {
+    bool NvapiVulkanLowLatency2LayerDevice::SetLatencyMarkerImpl(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) {
         auto markerType = ToVkLatencyMarkerNV(marker);
 
         if (markerType == VK_LATENCY_MARKER_MAX_ENUM_NV)
@@ -260,7 +260,7 @@ namespace dxvk {
         return true;
     }
 
-    void NvapiVulkanLowLatency2LayerDevice::QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) {
+    void NvapiVulkanLowLatency2LayerDevice::QueueNotifyOutOfBandImpl(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) {
         static_assert(static_cast<VkOutOfBandQueueTypeNV>(VULKAN_OUT_OF_BAND_QUEUE_TYPE_PRESENT) == VK_OUT_OF_BAND_QUEUE_TYPE_PRESENT_NV);
         static_assert(static_cast<VkOutOfBandQueueTypeNV>(VULKAN_OUT_OF_BAND_QUEUE_TYPE_RENDER) == VK_OUT_OF_BAND_QUEUE_TYPE_RENDER_NV);
 
@@ -326,19 +326,19 @@ namespace dxvk {
         : NvapiVulkanLowLatencyDevice(LowLatencyDeviceImplementation::VkReflexFake, device, semaphore, vkDestroySemaphore),
           PFN_INIT(vkSignalSemaphore) {}
 
-    NvBool NvapiVulkanLowLatencyFakeDevice::GetLowLatencyMode() {
+    NvBool NvapiVulkanLowLatencyFakeDevice::GetLowLatencyModeImpl() {
         return NV_FALSE;
     }
 
-    VkResult NvapiVulkanLowLatencyFakeDevice::SetLatencySleepMode(std::nullptr_t) {
+    VkResult NvapiVulkanLowLatencyFakeDevice::SetLatencySleepModeImpl(std::nullptr_t) {
         return VK_SUCCESS;
     }
 
-    VkResult NvapiVulkanLowLatencyFakeDevice::SetLatencySleepMode(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) {
+    VkResult NvapiVulkanLowLatencyFakeDevice::SetLatencySleepModeImpl(bool lowLatencyMode, bool lowLatencyBoost, uint32_t minimumIntervalUs) {
         return VK_SUCCESS;
     }
 
-    VkResult NvapiVulkanLowLatencyFakeDevice::LatencySleep(uint64_t value) {
+    VkResult NvapiVulkanLowLatencyFakeDevice::LatencySleepImpl(uint64_t value) {
         auto info = VkSemaphoreSignalInfoKHR{
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_KHR,
             .pNext = nullptr,
@@ -348,13 +348,13 @@ namespace dxvk {
         return m_vkSignalSemaphore(m_device, &info);
     }
 
-    void NvapiVulkanLowLatencyFakeDevice::GetLatencyTimings(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) {
+    void NvapiVulkanLowLatencyFakeDevice::GetLatencyTimingsImpl(std::span<NV_VULKAN_LATENCY_RESULT_PARAMS_V1::vkFrameReport, 64> frameReports) {
         memset(frameReports.data(), 0, frameReports.size_bytes());
     }
 
-    bool NvapiVulkanLowLatencyFakeDevice::SetLatencyMarker(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) {
+    bool NvapiVulkanLowLatencyFakeDevice::SetLatencyMarkerImpl(uint64_t frameID, NV_VULKAN_LATENCY_MARKER_TYPE marker) {
         return true;
     }
 
-    void NvapiVulkanLowLatencyFakeDevice::QueueNotifyOutOfBand(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) {}
+    void NvapiVulkanLowLatencyFakeDevice::QueueNotifyOutOfBandImpl(VkQueue queue, NV_VULKAN_OUT_OF_BAND_QUEUE_TYPE queueType) {}
 }
