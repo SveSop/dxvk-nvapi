@@ -34,6 +34,13 @@ NVAPI_INTERFACE NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU3
 ///////////////////////////////////////////////////////////////////////////////
 NVAPI_INTERFACE NvAPI_CUDA_EnumComputeCapableByTopology(NV_COMPUTE_GPU_TOPOLOGY* computeInfo, NvU32* displayId, NvU32 param0, NvU32 param1);
 
+///////////////////////////////////////////////////////////////////////////////
+// FUNCTION NAME:   NvAPI_GPU_GetPstatesInfo
+//
+//! DESCRIPTION:     This API is unknown and experimental - Deprecated
+///////////////////////////////////////////////////////////////////////////////
+NVAPI_INTERFACE NvAPI_GPU_GetPstatesInfo(NvPhysicalGpuHandle hPhysicalGpu, NV_GPU_PERF_PSTATES_INFO *pPstatesInfo);
+
 #ifdef __cplusplus
 }
 #endif
