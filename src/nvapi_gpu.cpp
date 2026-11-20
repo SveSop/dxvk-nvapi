@@ -1535,3 +1535,72 @@ NVAPI_FUNCTION NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32
 
     return Ok(str::format(n, " gpcIndex: ", gpcIndex, " support: ", *pTPCMask));
 }
+
+NVAPI_FUNCTION NvAPI_CUDA_EnumComputeCapableByTopology(NV_COMPUTE_GPU_TOPOLOGY* computeInfo, NvU32* displayId, NvU32 param0, NvU32 param1) {
+    // Experimental. Unknown struct!
+    static constexpr auto n = FUNC;
+    thread_local bool alreadyLoggedOk = false;
+
+    if (log::tracing())
+        log::trace(n, log::fmt::ptr(computeInfo), log::fmt::ptr(displayId), param0, param1);
+
+    if (!nvapiAdapterRegistry)
+        return ApiNotInitialized(n);
+
+    // Unknown struct V1 not supported
+    if (computeInfo->version != NV_COMPUTE_GPU_TOPOLOGY_VER)
+        return IncompatibleStructVersion(n, computeInfo->version);
+
+    // No support for displayId, as this is unknown for this function. Return InvalidDisplayId if displayId is not a nullptr
+    if (displayId)
+        return InvalidDisplayId(n);
+
+    auto cudaCapableGpus = std::vector<NvPhysicalGpuHandle>(0);
+    for (auto i = 0U; i < nvapiAdapterRegistry->GetAdapterCount(); i++) {
+        auto adapter = nvapiAdapterRegistry->GetAdapter(i);
+        if (!adapter->HasNvProprietaryDriver() || adapter->GetArchitectureId() < NV_GPU_ARCHITECTURE_GM000) // Maxwell is the oldest generation we can detect
+            continue;
+
+        cudaCapableGpus.push_back(reinterpret_cast<NvPhysicalGpuHandle>(adapter));
+    }
+
+    // This function retrieves number of adapters first in computeInfo->gpuCount
+    if (!computeInfo->gpuCount) {
+        computeInfo->gpuCount = static_cast<NvU32>(cudaCapableGpus.size());
+        if (log::tracing())
+            log::trace(n, "Compute capable GPU count: ", computeInfo->gpuCount);
+        return Ok(n);
+    }
+
+    // Then it is the callers responsibility to allocate memory to hold info for "gpuCount" amount of adapters
+    // This checks if the caller has allocated memory for computeGpus, and return InvalidArgument if not
+    if (!computeInfo->computeGpus)
+        return InvalidArgument(n);
+
+    // Write required adapter info - Assume caller has only allocated size gpuCount to the array
+    // Compare possible size given in the array vs. adapters available
+    auto count = computeInfo->gpuCount < cudaCapableGpus.size()
+            ? computeInfo->gpuCount
+            : cudaCapableGpus.size();
+
+    // Fill in the computeGpus array with the physical GPU handles and flags
+    // Potentially not 100% correct in a multi-gpu system, but this is the best we can do without knowing the actual topology of the system
+    for (auto i = 0U; i < count; i++) {
+        computeInfo->computeGpus[i].hPhysicalGpu = cudaCapableGpus[i];
+        computeInfo->computeGpus[i].flags =
+            NV_COMPUTE_GPU_TOPOLOGY_PHYSICS_CAPABLE |
+            NV_COMPUTE_GPU_TOPOLOGY_PHYSICS_ENABLE |
+            NV_COMPUTE_GPU_TOPOLOGY_PHYSICS_RECOMMENDED |
+            NV_COMPUTE_GPU_TOPOLOGY_CUDA_AVAILABLE |
+            NV_COMPUTE_GPU_TOPOLOGY_CUDA_CAPABLE |
+            NV_COMPUTE_GPU_TOPOLOGY_PHYSICS_AVAILABLE;
+
+            if (log::tracing())
+                log::trace(n, "Physical GPU: ", computeInfo->computeGpus[i].hPhysicalGpu, " flags: ", computeInfo->computeGpus[i].flags);
+    }
+
+    // Return adaptercount in computeInfo->gpuCount, as this is the amount of adapters we have filled in the array
+    computeInfo->gpuCount = static_cast<NvU32>(cudaCapableGpus.size());
+
+    return Ok(n, alreadyLoggedOk);
+}
