@@ -1488,3 +1488,50 @@ NVAPI_FUNCTION NvAPI_GPU_GetGPCMask(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pGP
 
     return Ok(str::format(n, " GPCMask: ", *pGPCMask));
 }
+
+NVAPI_FUNCTION NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32 gpcIndex, NvU32 *pTPCMask) {
+    // Completely unknown. Experimental!
+    static constexpr auto n = FUNC;
+
+    if (log::tracing())
+        log::trace(n, log::fmt::hnd(hPhysicalGpu), gpcIndex, log::fmt::ptr(pTPCMask));
+
+    auto returnAddress = _ReturnAddress();
+
+    if (!nvapiAdapterRegistry)
+        return ApiNotInitialized(n);
+
+    if (!pTPCMask)
+        return InvalidArgument(n);
+
+    auto adapter = reinterpret_cast<NvapiAdapter*>(hPhysicalGpu);
+    if (!nvapiAdapterRegistry->IsAdapter(adapter))
+        return ExpectedPhysicalGpuHandle(n);
+
+    auto architectureId = adapter->GetArchitectureId();
+    architectureId = env::needsGpuArchitectureSpoofing(architectureId, returnAddress).value_or(architectureId);
+
+    // The caller should use the amount of GPC's obtained using NvAPI_Get_GPCMask and check the layout of the TPC's
+    // This is ofc impossible to figure out, as this is higly dependant on GPU model.
+    // However, the total amount of TPC's should more or less be SM's / 2. (Each TPC has 2 SM's).
+    // So attempt to use some sort of calculation based on X080 type cards SM amounts, and end up near a correct
+    // total even if the actual layout is not correct.
+    switch (architectureId) {
+        case NV_GPU_ARCHITECTURE_AD100:
+            *pTPCMask = 31;
+            break;
+        case NV_GPU_ARCHITECTURE_GA100:
+             *pTPCMask = 63;
+            break;
+        case NV_GPU_ARCHITECTURE_TU100:
+            *pTPCMask = 15;
+            break;
+        default:
+            if (architectureId >= NV_GPU_ARCHITECTURE_GB200)
+                *pTPCMask = 63;
+            else
+                return NotSupported(n);
+    }
+
+    return Ok(str::format(n, " gpcIndex: ", gpcIndex, " support: ", *pTPCMask));
+}
