@@ -18,6 +18,8 @@ namespace dxvk {
         [[nodiscard]] virtual nvmlReturn_t DeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetTemperatureV(nvmlDevice_t device, nvmlTemperature_t* temperature) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetThermalSettings(nvmlDevice_t device, unsigned int sensorIndex, nvmlGpuThermalSettings_t* pThermalSettings) const;
+        [[nodiscard]] virtual nvmlReturn_t DeviceGetNumFans(nvmlDevice_t device, unsigned int *numFans) const;
+        [[nodiscard]] virtual nvmlReturn_t DeviceGetFanSpeed_v2(nvmlDevice_t device, unsigned int fan, unsigned int *speed) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetFanSpeedRPM(nvmlDevice_t device, nvmlFanSpeedInfo_t* fanSpeed) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetPerformanceState(nvmlDevice_t device, nvmlPstates_t* pState) const;
         [[nodiscard]] virtual nvmlReturn_t DeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t* utilization) const;
@@ -48,6 +50,8 @@ namespace dxvk {
         DECLARE_PFN(nvmlDeviceGetMaxClockInfo);
         DECLARE_PFN(nvmlDeviceGetTemperatureV);
         DECLARE_PFN(nvmlDeviceGetThermalSettings);
+        DECLARE_PFN(nvmlDeviceGetNumFans);
+        DECLARE_PFN(nvmlDeviceGetFanSpeed_v2);
         DECLARE_PFN(nvmlDeviceGetFanSpeedRPM);
         DECLARE_PFN(nvmlDeviceGetPerformanceState);
         DECLARE_PFN(nvmlDeviceGetUtilizationRates);
