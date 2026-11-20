@@ -27,6 +27,13 @@ NVAPI_INTERFACE NvAPI_GPU_GetGPCMask(NvPhysicalGpuHandle hPhysicalGpu, NvU32 *pG
 ///////////////////////////////////////////////////////////////////////////////
 NVAPI_INTERFACE NvAPI_GPU_GetTPCMaskOnGPC(NvPhysicalGpuHandle hPhysicalGpu, NvU32 gpcIndex, NvU32 *pTPCMask);
 
+///////////////////////////////////////////////////////////////////////////////
+// FUNCTION NAME:   NvAPI_CUDA_EnumComputeCapableByTopology
+//
+//! DESCRIPTION:     This API is unknown and experimental
+///////////////////////////////////////////////////////////////////////////////
+NVAPI_INTERFACE NvAPI_CUDA_EnumComputeCapableByTopology(NV_COMPUTE_GPU_TOPOLOGY* computeInfo, NvU32* displayId, NvU32 param0, NvU32 param1);
+
 #ifdef __cplusplus
 }
 #endif
